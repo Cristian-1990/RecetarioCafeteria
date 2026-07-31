@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="RecetarioCafeteria.Back/RecetarioCafeteria.Back.csproj" />
+  <Project Path="RecetarioCafeteria.Blazor/RecetarioCafeteria.Blazor.csproj" />
+  <Project Path="RecetarioCafeteria.Test/RecetarioCafeteria.Test.csproj" />
+</Solution>
