@@ -1,0 +1,98 @@
+@page "/recetas"
+@rendermode InteractiveServer
+@inject IRecetaService RecetaService
+
+<PageTitle>Recetas</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4" Style="color:#3E2723;">Recetas</MudText>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <MudChip T="string" Color="@(_categoriaSeleccionada is null ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada is null ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => FiltrarAsync(null))">
+        Todas
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Cafeteria ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Cafeteria ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Cafeteria))">
+        Cafetería
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Infusiones ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Infusiones ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Infusiones))">
+        Infusiones
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Otras ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Otras ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Otras))">
+        Otras
+    </MudChip>
+</div>
+
+@if (_cargando)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (!_recetas.Any())
+{
+    <MudAlert Severity="Severity.Info">No hay recetas en esta categoría.</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var receta in _recetas)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2" Style="height:100%; display:flex; flex-direction:column;">
+                    <MudCardContent Style="flex-grow:1;">
+                        <MudText Typo="Typo.h6" Style="color:#3E2723;">@receta.Titulo</MudText>
+                        <MudText Typo="Typo.body2" Style="color:#6D4C41;">@receta.Categoria</MudText>
+                        <div class="d-flex align-center mt-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" Class="mr-1"/>
+                            <MudText Typo="Typo.body2">@receta.TiempoMinutos min</MudText>
+                        </div>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   EndIcon="@Icons.Material.Filled.ChevronRight"
+                                   Href="@($"/recetas/{receta.Id}")">
+                            Ver receta
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private IEnumerable<Receta> _recetas = [];
+    private CategoriaReceta? _categoriaSeleccionada;
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAsync();
+    }
+
+    private async Task FiltrarAsync(CategoriaReceta? categoria)
+    {
+        _categoriaSeleccionada = categoria;
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        _cargando = true;
+        _recetas = _categoriaSeleccionada is null
+            ? await RecetaService.GetAllAsync()
+            : await RecetaService.GetByCategoriaAsync(_categoriaSeleccionada.Value);
+        _cargando = false;
+    }
+}
