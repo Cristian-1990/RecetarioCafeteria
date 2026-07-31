@@ -1,0 +1,140 @@
+@page "/recetas/{Id:int}"
+@rendermode InteractiveServer
+@inject IRecetaService RecetaService
+
+<PageTitle>@(_receta?.Titulo ?? "Receta")</PageTitle>
+
+@if (_cargando)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_receta is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">No se ha encontrado esta receta.</MudAlert>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.ArrowBack"
+               Href="/recetas">
+        Volver al listado
+    </MudButton>
+}
+else
+{
+    <MudButton Variant="Variant.Text"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.ArrowBack"
+               Href="/recetas"
+               Class="mb-4">
+        Volver al listado
+    </MudButton>
+
+    <MudGrid Class="mb-6">
+        <MudItem xs="12" sm="4">
+            @if (!string.IsNullOrWhiteSpace(_receta.FotoUrl))
+            {
+                <MudImage Src="@_receta.FotoUrl"
+                          Alt="@_receta.Titulo"
+                          ObjectFit="ObjectFit.Cover"
+                          Style="width:100%; aspect-ratio:1; border-radius:8px;"/>
+            }
+            else
+            {
+                <div class="d-flex align-center justify-center"
+                     style="width:100%; aspect-ratio:1; background-color:#F5F0EB; border-radius:8px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="font-size:5rem; color:#6D4C41;"/>
+                </div>
+            }
+        </MudItem>
+        <MudItem xs="12" sm="8">
+            <MudText Typo="Typo.h4" Style="color:#3E2723;">@_receta.Titulo</MudText>
+            <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Class="mt-2">
+                @_receta.Categoria
+            </MudChip>
+            <div class="d-flex align-center mt-3">
+                <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-1"/>
+                <MudText Typo="Typo.subtitle1">@_receta.TiempoMinutos min</MudText>
+            </div>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Ingredientes</MudText>
+    <ul style="list-style:none; padding:0; margin:0 0 2rem 0;">
+        @foreach (var ingrediente in _receta.Ingredientes)
+        {
+            <li class="d-flex align-center mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.FiberManualRecord" Size="Size.Small" Class="mr-2" Style="color:#6D4C41;"/>
+                <MudText Typo="Typo.body1">@ingrediente.Nombre — @FormatearCantidad(ingrediente)</MudText>
+            </li>
+        }
+    </ul>
+
+    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Preparación</MudText>
+
+    @if (_mostrarBotonListo)
+    {
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Success"
+                   Size="Size.Large"
+                   StartIcon="@Icons.Material.Filled.CheckCircle"
+                   Class="mb-4"
+                   OnClick="SaltarAElaboracion">
+            Ya tengo todo listo
+        </MudButton>
+    }
+
+    <MudStepper @bind-ActiveIndex="_activeIndex">
+        @foreach (var paso in _pasosOrdenados)
+        {
+            <MudStep Title="@paso.Fase.ToString()">
+                <MudText Typo="Typo.h5">@paso.Descripcion</MudText>
+            </MudStep>
+        }
+    </MudStepper>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Receta? _receta;
+    private bool _cargando = true;
+    private List<Paso> _pasosOrdenados = [];
+    private int _activeIndex;
+
+    private bool _mostrarBotonListo =>
+        _pasosOrdenados.Count > 0
+        && _activeIndex < _pasosOrdenados.Count
+        && _pasosOrdenados[_activeIndex].Fase == FasePaso.Preparacion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resultado = await RecetaService.GetByIdAsync(Id);
+        if (resultado.IsSuccess)
+        {
+            _receta = resultado.Value;
+            _pasosOrdenados =
+            [
+                .. _receta.Pasos.Where(p => p.Fase == FasePaso.Preparacion).OrderBy(p => p.Orden),
+                .. _receta.Pasos.Where(p => p.Fase == FasePaso.Elaboracion).OrderBy(p => p.Orden)
+            ];
+        }
+        _cargando = false;
+    }
+
+    private void SaltarAElaboracion()
+    {
+        var primerIndiceElaboracion = _pasosOrdenados.FindIndex(p => p.Fase == FasePaso.Elaboracion);
+        if (primerIndiceElaboracion >= 0)
+            _activeIndex = primerIndiceElaboracion;
+    }
+
+    private static string FormatearCantidad(Ingrediente ingrediente)
+    {
+        var unidad = ingrediente.Unidad switch
+        {
+            UnidadMedida.Gramos => "g",
+            UnidadMedida.Mililitros => "ml",
+            _ => ingrediente.Unidad.ToString()
+        };
+        return $"{ingrediente.Cantidad} {unidad}";
+    }
+}
