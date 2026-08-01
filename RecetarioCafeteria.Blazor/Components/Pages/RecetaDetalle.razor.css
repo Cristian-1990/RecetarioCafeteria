@@ -1,14 +1,5 @@
-::deep .mud-step-label-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 1.15rem;
-}
-
-::deep .mud-step-label-content-title {
-    font-size: 1rem;
-}
-
 ::deep .mud-stepper-content {
-    margin-inline-start: 40px;
-    padding-inline-start: 28px;
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+    border-inline-start: none;
 }

@@ -34,7 +34,7 @@ public class RecetaEfRepositoryTest
     private static Receta RecetaValida() => new()
     {
         Titulo = "Café con leche",
-        Categoria = CategoriaReceta.Cafeteria,
+        Categoria = CategoriaReceta.Cafe,
         TiempoMinutos = 5,
         FotoUrl = "cafe-con-leche.jpg",
         Ingredientes =
@@ -95,7 +95,7 @@ public class RecetaEfRepositoryTest
     {
         // Arrange
         await _repository.CreateAsync(RecetaValida());
-        await _repository.CreateAsync(RecetaValida() with { Titulo = "Té verde", Categoria = CategoriaReceta.Infusiones });
+        await _repository.CreateAsync(RecetaValida() with { Titulo = "Té verde", Categoria = CategoriaReceta.Bebidas });
 
         // Act
         var recetas = await _repository.GetAllAsync();
@@ -139,10 +139,10 @@ public class RecetaEfRepositoryTest
     {
         // Arrange
         await _repository.CreateAsync(RecetaValida());
-        await _repository.CreateAsync(RecetaValida() with { Titulo = "Té verde", Categoria = CategoriaReceta.Infusiones });
+        await _repository.CreateAsync(RecetaValida() with { Titulo = "Té verde", Categoria = CategoriaReceta.Bebidas });
 
         // Act
-        var resultado = await _repository.GetByCategoriaAsync(CategoriaReceta.Cafeteria);
+        var resultado = await _repository.GetByCategoriaAsync(CategoriaReceta.Cafe);
 
         // Assert
         resultado.Should().HaveCount(1);

@@ -1,5 +1,64 @@
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('fonts/roboto-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/roboto-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('fonts/roboto-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('fonts/roboto-latin.woff2') format('woff2');
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Enlace activo del menú lateral: MudBlazor lo pinta en Primary (#6D4C41) por
+   defecto, contraste insuficiente sobre el fondo del drawer (#B8956A, ~2.7:1).
+   Reglas globales (no CSS aislado) porque MainLayout.razor no envuelve el menú
+   en HTML propio, así que ::deep no llega a estos elementos. !important porque
+   app.css se carga antes que MudBlazor.min.css en App.razor.
+   Pastilla sólida en Primary + texto crema (~6.7:1) para el enlace activo;
+   el resto de enlaces usa DrawerText (#3E2723 sobre #B8956A, ~5:1). */
+.mud-nav-link.active {
+    background-color: #6D4C41 !important;
+    border-color: transparent !important;
+}
+
+.mud-nav-link.active,
+.mud-nav-link.active .mud-nav-link-text,
+.mud-nav-link.active .mud-nav-link-icon {
+    color: #F5F0EB !important;
+}
+
+/* Profundidad del drawer: el Elevation="2" de MudDrawer usa la sombra
+   genérica de Material (pensada para tarjetas sobre fondo claro), demasiado
+   sutil para un panel lateral persistente. Borde/sombra propios en el canto
+   derecho. Global (no aislado) por el mismo motivo que la regla anterior. */
+.mud-drawer {
+    border-right: 1px solid rgba(0, 0, 0, 0.4);
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.25) !important;
 }
 
 a, .btn-link {

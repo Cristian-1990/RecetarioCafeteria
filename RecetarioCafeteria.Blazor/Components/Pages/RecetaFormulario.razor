@@ -36,14 +36,35 @@ else
         <MudTextField T="string" @bind-Value="_titulo" Label="Título" Variant="Variant.Outlined" Class="mb-4"/>
 
         <MudSelect T="CategoriaReceta" @bind-Value="_categoria" Label="Categoría" Variant="Variant.Outlined" Class="mb-4">
-            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Cafeteria">Cafetería</MudSelectItem>
-            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Infusiones">Infusiones</MudSelectItem>
-            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Otras">Otras</MudSelectItem>
+            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Bebidas">Bebidas</MudSelectItem>
+            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Reposteria">Repostería</MudSelectItem>
+            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Salados">Salados</MudSelectItem>
+            <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Cafe">Café</MudSelectItem>
         </MudSelect>
 
         <MudNumericField T="int" @bind-Value="_tiempoMinutos" Label="Tiempo (minutos)" Variant="Variant.Outlined" Min="0" Class="mb-4"/>
 
         <MudTextField T="string" @bind-Value="_fotoUrl" Label="Ruta de la foto (opcional)" Variant="Variant.Outlined" Class="mb-4"/>
+
+        <MudSelect T="Alergeno" @bind-SelectedValues="_alergenosSeleccionados" MultiSelection="true"
+                   Label="Alérgenos" Variant="Variant.Outlined" Class="mb-4">
+            <MudSelectItem T="Alergeno" Value="Alergeno.Gluten">Gluten</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Crustaceos">Crustáceos</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Huevos">Huevos</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Pescado">Pescado</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Cacahuetes">Cacahuetes</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Soja">Soja</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Lacteos">Lácteos</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.FrutosDeCascara">Frutos de cáscara</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Apio">Apio</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Mostaza">Mostaza</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Sesamo">Sésamo</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Sulfitos">Sulfitos</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Altramuces">Altramuces</MudSelectItem>
+            <MudSelectItem T="Alergeno" Value="Alergeno.Moluscos">Moluscos</MudSelectItem>
+        </MudSelect>
+
+        <MudTextField T="string" @bind-Value="_notaFinal" Label="Nota de cierre (opcional)" Variant="Variant.Outlined" Lines="3"/>
     </MudPaper>
 
     <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Ingredientes</MudText>
@@ -56,12 +77,45 @@ else
                 <MudSelect T="UnidadMedida" @bind-Value="fila.Valor.Unidad" Label="Unidad" Variant="Variant.Outlined" Style="max-width:140px;">
                     <MudSelectItem T="UnidadMedida" Value="UnidadMedida.Gramos">Gramos</MudSelectItem>
                     <MudSelectItem T="UnidadMedida" Value="UnidadMedida.Mililitros">Mililitros</MudSelectItem>
+                    <MudSelectItem T="UnidadMedida" Value="UnidadMedida.Unidades">Unidades</MudSelectItem>
                 </MudSelect>
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarIngrediente(fila))"/>
             </div>
         }
         <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AgregarIngrediente">
             Añadir ingrediente
+        </MudButton>
+    </MudPaper>
+
+    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Utensilios</MudText>
+    <MudPaper Class="pa-4 mb-6" Elevation="1">
+        @foreach (var fila in _filasUtensilios)
+        {
+            <div @key="fila.Clave" class="d-flex align-center gap-2 mb-2">
+                <MudTextField T="string" @bind-Value="fila.Valor" Label="Utensilio" Variant="Variant.Outlined" Class="flex-grow-1"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarUtensilio(fila))"/>
+            </div>
+        }
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AgregarUtensilio">
+            Añadir utensilio
+        </MudButton>
+    </MudPaper>
+
+    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Mise en Place</MudText>
+    <MudPaper Class="pa-4 mb-6" Elevation="1">
+        @for (var i = 0; i < _filasMiseEnPlace.Count; i++)
+        {
+            var fila = _filasMiseEnPlace[i];
+            var index = i;
+            <div @key="fila.Clave" class="d-flex align-center gap-2 mb-2">
+                <MudTextField T="string" @bind-Value="fila.Valor" Label="Agrupación" Variant="Variant.Outlined" Class="flex-grow-1"/>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirMiseEnPlace(index))"/>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasMiseEnPlace.Count - 1)" OnClick="@(() => BajarMiseEnPlace(index))"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarMiseEnPlace(fila))"/>
+            </div>
+        }
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AgregarMiseEnPlace">
+            Añadir agrupación
         </MudButton>
     </MudPaper>
 
@@ -137,11 +191,15 @@ else
     private bool _esNuevo => Id is null;
 
     private string _titulo = string.Empty;
-    private CategoriaReceta _categoria = CategoriaReceta.Cafeteria;
+    private CategoriaReceta _categoria = CategoriaReceta.Bebidas;
     private int _tiempoMinutos;
     private string _fotoUrl = string.Empty;
+    private IReadOnlyCollection<Alergeno> _alergenosSeleccionados = [];
+    private string? _notaFinal;
 
     private List<FilaIngrediente> _filasIngredientes = [];
+    private List<FilaUtensilio> _filasUtensilios = [];
+    private List<FilaMiseEnPlace> _filasMiseEnPlace = [];
     private List<FilaPaso> _filasPreparacion = [];
     private List<FilaPaso> _filasElaboracion = [];
 
@@ -163,7 +221,11 @@ else
                 _categoria = receta.Categoria;
                 _tiempoMinutos = receta.TiempoMinutos;
                 _fotoUrl = receta.FotoUrl;
+                _alergenosSeleccionados = receta.Alergenos;
+                _notaFinal = receta.NotaFinal;
                 _filasIngredientes = receta.Ingredientes.Select(i => new FilaIngrediente { Valor = i }).ToList();
+                _filasUtensilios = receta.Utensilios.Select(u => new FilaUtensilio { Valor = u }).ToList();
+                _filasMiseEnPlace = receta.MiseEnPlace.Select(m => new FilaMiseEnPlace { Valor = m }).ToList();
                 _filasPreparacion = receta.Pasos
                     .Where(p => p.Fase == FasePaso.Preparacion)
                     .OrderBy(p => p.Orden)
@@ -187,6 +249,26 @@ else
     private void AgregarIngrediente() => _filasIngredientes.Add(new FilaIngrediente());
 
     private void EliminarIngrediente(FilaIngrediente fila) => _filasIngredientes.Remove(fila);
+
+    private void AgregarUtensilio() => _filasUtensilios.Add(new FilaUtensilio());
+
+    private void EliminarUtensilio(FilaUtensilio fila) => _filasUtensilios.Remove(fila);
+
+    private void AgregarMiseEnPlace() => _filasMiseEnPlace.Add(new FilaMiseEnPlace());
+
+    private void EliminarMiseEnPlace(FilaMiseEnPlace fila) => _filasMiseEnPlace.Remove(fila);
+
+    private void SubirMiseEnPlace(int index)
+    {
+        if (index > 0)
+            (_filasMiseEnPlace[index], _filasMiseEnPlace[index - 1]) = (_filasMiseEnPlace[index - 1], _filasMiseEnPlace[index]);
+    }
+
+    private void BajarMiseEnPlace(int index)
+    {
+        if (index < _filasMiseEnPlace.Count - 1)
+            (_filasMiseEnPlace[index], _filasMiseEnPlace[index + 1]) = (_filasMiseEnPlace[index + 1], _filasMiseEnPlace[index]);
+    }
 
     private static void AgregarPaso(List<FilaPaso> lista) => lista.Add(new FilaPaso());
 
@@ -229,7 +311,11 @@ else
             TiempoMinutos = _tiempoMinutos,
             FotoUrl = _fotoUrl,
             Ingredientes = _filasIngredientes.Select(f => f.Valor).ToList(),
-            Pasos = pasos
+            Pasos = pasos,
+            Alergenos = _alergenosSeleccionados.ToList(),
+            Utensilios = _filasUtensilios.Select(f => f.Valor).ToList(),
+            MiseEnPlace = _filasMiseEnPlace.Select(f => f.Valor).ToList(),
+            NotaFinal = _notaFinal
         };
 
         var resultado = _esNuevo
@@ -287,6 +373,18 @@ else
     {
         public Guid Clave { get; } = Guid.NewGuid();
         public Ingrediente Valor { get; set; } = new();
+    }
+
+    private sealed class FilaUtensilio
+    {
+        public Guid Clave { get; } = Guid.NewGuid();
+        public string Valor { get; set; } = string.Empty;
+    }
+
+    private sealed class FilaMiseEnPlace
+    {
+        public Guid Clave { get; } = Guid.NewGuid();
+        public string Valor { get; set; } = string.Empty;
     }
 
     private sealed class FilaPaso

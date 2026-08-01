@@ -26,7 +26,7 @@ public class RecetaServiceTest
     private static Receta RecetaValida() => new()
     {
         Titulo = "Café con leche",
-        Categoria = CategoriaReceta.Cafeteria,
+        Categoria = CategoriaReceta.Cafe,
         TiempoMinutos = 5,
         Ingredientes =
         [
@@ -172,14 +172,14 @@ public class RecetaServiceTest
         // Arrange
         var recetas = new List<Receta> { RecetaValida() };
         _repositoryMock
-            .Setup(r => r.GetByCategoriaAsync(CategoriaReceta.Cafeteria))
+            .Setup(r => r.GetByCategoriaAsync(CategoriaReceta.Cafe))
             .ReturnsAsync(recetas);
 
         // Act
-        var resultado = await _service.GetByCategoriaAsync(CategoriaReceta.Cafeteria);
+        var resultado = await _service.GetByCategoriaAsync(CategoriaReceta.Cafe);
 
         // Assert
         resultado.Should().HaveCount(1);
-        _repositoryMock.Verify(r => r.GetByCategoriaAsync(CategoriaReceta.Cafeteria), Times.Once);
+        _repositoryMock.Verify(r => r.GetByCategoriaAsync(CategoriaReceta.Cafe), Times.Once);
     }
 }

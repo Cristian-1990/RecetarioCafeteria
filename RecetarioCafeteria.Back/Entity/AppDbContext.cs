@@ -1,4 +1,8 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using RecetarioCafeteria.Back.Models;
+
 namespace RecetarioCafeteria.Back.Entity;
 
 public class AppDbContext : DbContext
@@ -33,6 +37,38 @@ public class AppDbContext : DbContext
             .WithOne(p => p.Receta)
             .HasForeignKey(p => p.RecetaId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RecetaEntity>()
+            .Property(r => r.Alergenos)
+            .HasConversion(
+                v => string.Join(',', v.Select(a => a.ToString())),
+                v => v.Length == 0
+                    ? new List<Alergeno>()
+                    : v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<Alergeno>).ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<Alergeno>>(
+                (a, b) => a!.SequenceEqual(b!),
+                a => a.Aggregate(0, (hash, v) => HashCode.Combine(hash, v)),
+                a => a.ToList()));
+
+        modelBuilder.Entity<RecetaEntity>()
+            .Property(r => r.Utensilios)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default) ?? new List<string>())
+            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (a, b) => a!.SequenceEqual(b!),
+                a => a.Aggregate(0, (hash, v) => HashCode.Combine(hash, v)),
+                a => a.ToList()));
+
+        modelBuilder.Entity<RecetaEntity>()
+            .Property(r => r.MiseEnPlace)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default) ?? new List<string>())
+            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (a, b) => a!.SequenceEqual(b!),
+                a => a.Aggregate(0, (hash, v) => HashCode.Combine(hash, v)),
+                a => a.ToList()));
     }
 
     /// <summary>

@@ -86,6 +86,10 @@ public class RecetaEfRepository : IRecetaRepository
             entity.Categoria = receta.Categoria;
             entity.TiempoMinutos = receta.TiempoMinutos;
             entity.FotoUrl = receta.FotoUrl;
+            entity.Alergenos = receta.Alergenos;
+            entity.Utensilios = receta.Utensilios;
+            entity.MiseEnPlace = receta.MiseEnPlace;
+            entity.NotaFinal = receta.NotaFinal;
 
             entity.Ingredientes.Clear();
             entity.Ingredientes.AddRange(receta.Ingredientes.Select(i => i.ToEntity()));
@@ -113,12 +117,47 @@ public class RecetaEfRepository : IRecetaRepository
         {
             context.Recetas.Remove(entity);
             await context.SaveChangesAsync();
+            await RenumerarIdsAsync(context, id);
             return Result.Success<Receta, DomainError>(entity.ToReceta());
         }
         catch (Exception ex)
         {
             return Result.Failure<Receta, DomainError>(RecetaErrors.DatabaseError(ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Tras borrar la receta con Id igual a idEliminado, desplaza en -1 el Id de todas las
+    /// recetas posteriores (y el RecetaId de sus ingredientes/pasos) para que los Ids queden
+    /// contiguos. Los FK de SQLite se desactivan temporalmente porque el desplazamiento pasa
+    /// por estados intermedios donde padre e hijo no coinciden.
+    /// </summary>
+    private static async Task RenumerarIdsAsync(AppDbContext context, int idEliminado)
+    {
+        var idsAReordenar = await context.Recetas
+            .Where(r => r.Id > idEliminado)
+            .OrderBy(r => r.Id)
+            .Select(r => r.Id)
+            .ToListAsync();
+
+        if (idsAReordenar.Count == 0)
+            return;
+
+        await context.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = OFF;");
+
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        foreach (var idActual in idsAReordenar)
+        {
+            var idNuevo = idActual - 1;
+            await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Pasos SET RecetaId = {idNuevo} WHERE RecetaId = {idActual}");
+            await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Ingredientes SET RecetaId = {idNuevo} WHERE RecetaId = {idActual}");
+            await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Recetas SET Id = {idNuevo} WHERE Id = {idActual}");
+        }
+
+        await transaction.CommitAsync();
+
+        await context.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = ON;");
     }
 
     public async Task<IEnumerable<Receta>> GetByCategoriaAsync(CategoriaReceta categoria)

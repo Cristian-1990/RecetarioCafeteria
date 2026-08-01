@@ -6,12 +6,12 @@
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <MudAppBar Elevation="1" Style="background-color:#1A1A1A;">
+    <MudAppBar Elevation="1">
         <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="background-color:white; color:#3E2723; border-radius:50%; padding:8px; height:24px; width:24px; margin-right:12px;"/>
-        <MudText Typo="Typo.h5" Style="color:#FFFFFF;">Recetario Cafetería</MudText>
+        <MudText Typo="Typo.h5" Style="color:#FFFFFF;">Recetario</MudText>
     </MudAppBar>
 
-    <MudDrawer Open="true" Elevation="2" Variant="@DrawerVariant.Persistent">
+    <MudDrawer Open="true" Elevation="4" Variant="@DrawerVariant.Persistent">
         <MudNavMenu>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Inicio</MudNavLink>
             <MudNavLink Href="recetas" Icon="@Icons.Material.Filled.MenuBook">Recetas</MudNavLink>
@@ -32,17 +32,26 @@
 </div>
 
 @code {
+    // Mismo marrón que usan los círculos numerados de los pasos y el AppBar: se
+    // reutiliza la misma constante en vez de repetir el hex en dos sitios.
+    private const string PrimaryColor = "#6D4C41";
+
+    // Mismo tono que el botón "Mise en Place lista" de RecetaDetalle.razor
+    // (Style="background-color:#B8956A;"), reutilizado tal cual para el drawer.
+    private const string DrawerBackgroundColor = "#B8956A";
+
     private readonly MudTheme _theme = new()
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#6D4C41",
+            Primary = PrimaryColor,
             Secondary = "#8D6E63",
-            AppbarBackground = "#1A1A1A",
+            AppbarBackground = PrimaryColor,
             Background = "#EFE6DA",
             Surface = "#FFFBF5",
-            DrawerBackground = "#F5F0EB",
+            DrawerBackground = DrawerBackgroundColor,
             DrawerText = "#3E2723",
+            DrawerIcon = "#3E2723",
             TextPrimary = "#2C2C2A",
             Error = "#993C1D",
             Dark = "#3E2723"

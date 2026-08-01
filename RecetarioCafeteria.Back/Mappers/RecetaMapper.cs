@@ -14,7 +14,11 @@ public static class RecetaMapper
             TiempoMinutos = receta.TiempoMinutos,
             FotoUrl = receta.FotoUrl,
             Ingredientes = receta.Ingredientes.Select(i => i.ToEntity()).ToList(),
-            Pasos = receta.Pasos.Select(p => p.ToEntity()).ToList()
+            Pasos = receta.Pasos.Select(p => p.ToEntity()).ToList(),
+            Alergenos = receta.Alergenos.ToList(),
+            Utensilios = receta.Utensilios.ToList(),
+            MiseEnPlace = receta.MiseEnPlace.ToList(),
+            NotaFinal = receta.NotaFinal
         };
     }
 
@@ -28,7 +32,11 @@ public static class RecetaMapper
             TiempoMinutos = entity.TiempoMinutos,
             FotoUrl = entity.FotoUrl,
             Ingredientes = entity.Ingredientes.Select(i => i.ToIngrediente()).ToList(),
-            Pasos = entity.Pasos.Select(p => p.ToPaso()).ToList()
+            Pasos = entity.Pasos.Select(p => p.ToPaso()).ToList(),
+            Alergenos = entity.Alergenos.ToList(),
+            Utensilios = entity.Utensilios.ToList(),
+            MiseEnPlace = entity.MiseEnPlace.ToList(),
+            NotaFinal = entity.NotaFinal
         };
     }
 

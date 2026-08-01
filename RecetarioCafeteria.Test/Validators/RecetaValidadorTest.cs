@@ -18,7 +18,7 @@ public class RecetaValidadorTest
     private static Receta RecetaValida() => new()
     {
         Titulo = "Café con leche",
-        Categoria = CategoriaReceta.Cafeteria,
+        Categoria = CategoriaReceta.Cafe,
         TiempoMinutos = 5,
         Ingredientes =
         [

@@ -3,7 +3,61 @@
 
 <PageTitle>Recetas</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4" Style="color:#3E2723;">Recetas</MudText>
+<div class="d-flex justify-center mb-4">
+    <MudPaper Elevation="3" Style="border-radius:9999px; max-width:400px; width:100%; padding:2px 20px;">
+        <MudTextField T="string"
+                      @bind-Value="_busqueda"
+                      Immediate="true"
+                      Placeholder="Buscar receta..."
+                      Variant="Variant.Text"
+                      Underline="false"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"/>
+    </MudPaper>
+</div>
+
+<div class="mb-4" style="background-color:rgba(109,76,65,0.10); border-radius:12px; padding:16px 24px;">
+    <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">Recetas</MudText>
+</div>
+
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="2"
+                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  @onclick="@(() => FiltrarAsync(CategoriaReceta.Bebidas))">
+            <MudIcon Icon="@Icons.Material.Filled.LocalDrink" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Bebidas</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="2"
+                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  @onclick="@(() => FiltrarAsync(CategoriaReceta.Reposteria))">
+            <MudIcon Icon="@Icons.Material.Filled.Cake" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Repostería</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="2"
+                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  @onclick="@(() => FiltrarAsync(CategoriaReceta.Salados))">
+            <MudIcon Icon="@Icons.Material.Filled.LunchDining" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Salados</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="2"
+                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  @onclick="@(() => FiltrarAsync(CategoriaReceta.Cafe))">
+            <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Café</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 <div class="d-flex flex-wrap gap-2 mb-4">
     <MudChip T="string" Color="@(_categoriaSeleccionada is null ? Color.Primary : Color.Default)"
@@ -12,23 +66,29 @@
              OnClick="@(() => FiltrarAsync(null))">
         Todas
     </MudChip>
-    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Cafeteria ? Color.Primary : Color.Default)"
-             Variant="@(_categoriaSeleccionada == CategoriaReceta.Cafeteria ? Variant.Filled : Variant.Outlined)"
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Bebidas ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Bebidas ? Variant.Filled : Variant.Outlined)"
              Style="font-size:1rem; padding:6px 4px;"
-             OnClick="@(() => FiltrarAsync(CategoriaReceta.Cafeteria))">
-        Cafetería
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Bebidas))">
+        Bebidas
     </MudChip>
-    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Infusiones ? Color.Primary : Color.Default)"
-             Variant="@(_categoriaSeleccionada == CategoriaReceta.Infusiones ? Variant.Filled : Variant.Outlined)"
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Reposteria ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Reposteria ? Variant.Filled : Variant.Outlined)"
              Style="font-size:1rem; padding:6px 4px;"
-             OnClick="@(() => FiltrarAsync(CategoriaReceta.Infusiones))">
-        Infusiones
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Reposteria))">
+        Repostería
     </MudChip>
-    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Otras ? Color.Primary : Color.Default)"
-             Variant="@(_categoriaSeleccionada == CategoriaReceta.Otras ? Variant.Filled : Variant.Outlined)"
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Salados ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Salados ? Variant.Filled : Variant.Outlined)"
              Style="font-size:1rem; padding:6px 4px;"
-             OnClick="@(() => FiltrarAsync(CategoriaReceta.Otras))">
-        Otras
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Salados))">
+        Salados
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Cafe ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Cafe ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => FiltrarAsync(CategoriaReceta.Cafe))">
+        Café
     </MudChip>
 </div>
 
@@ -36,14 +96,14 @@
 {
     <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
 }
-else if (!_recetas.Any())
+else if (!_recetasFiltradas.Any())
 {
-    <MudAlert Severity="Severity.Info">No hay recetas en esta categoría.</MudAlert>
+    <MudAlert Severity="Severity.Info">No se han encontrado recetas con estos filtros.</MudAlert>
 }
 else
 {
     <MudGrid>
-        @foreach (var receta in _recetas)
+        @foreach (var receta in _recetasFiltradas)
         {
             <MudItem xs="12" sm="6" md="4">
                 <MudCard Elevation="2" Style="height:100%; display:flex; flex-direction:column;">
@@ -74,6 +134,12 @@ else
     private IEnumerable<Receta> _recetas = [];
     private CategoriaReceta? _categoriaSeleccionada;
     private bool _cargando = true;
+    private string _busqueda = string.Empty;
+
+    private IEnumerable<Receta> _recetasFiltradas =>
+        string.IsNullOrWhiteSpace(_busqueda)
+            ? _recetas
+            : _recetas.Where(r => r.Titulo.Contains(_busqueda, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
