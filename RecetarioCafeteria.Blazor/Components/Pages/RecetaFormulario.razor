@@ -3,6 +3,7 @@
 @inject IRecetaService RecetaService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>@(_esNuevo ? "Nueva receta" : "Editar receta")</PageTitle>
 
@@ -106,7 +107,7 @@ else
                    Size="Size.Large"
                    StartIcon="@Icons.Material.Filled.Save"
                    OnClick="GuardarAsync"
-                   Disabled="@_guardando">
+                   Disabled="@(_guardando || _eliminando)">
             Guardar
         </MudButton>
         <MudButton Variant="Variant.Outlined"
@@ -115,6 +116,18 @@ else
                    Href="@(_esNuevo ? "/recetas" : $"/recetas/{Id}")">
             Cancelar
         </MudButton>
+        @if (!_esNuevo)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Error"
+                       Size="Size.Large"
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="ConfirmarEliminarAsync"
+                       Disabled="@(_guardando || _eliminando)"
+                       Class="ml-auto">
+                Eliminar receta
+            </MudButton>
+        }
     </div>
 }
 
@@ -135,6 +148,7 @@ else
     private bool _cargando = true;
     private bool _recetaNoEncontrada;
     private bool _guardando;
+    private bool _eliminando;
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -231,6 +245,41 @@ else
         {
             _error = resultado.Error.Message;
             _guardando = false;
+        }
+    }
+
+    private async Task ConfirmarEliminarAsync()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>
+        {
+            { x => x.ContentText, $"¿Seguro que quieres eliminar '{_titulo}'? Esta acción no se puede deshacer." },
+            { x => x.ConfirmText, "Eliminar" },
+            { x => x.CancelText, "Cancelar" }
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Eliminar receta", parameters);
+        var resultado = await dialog.Result;
+
+        if (resultado is not null && !resultado.Canceled)
+            await EliminarAsync();
+    }
+
+    private async Task EliminarAsync()
+    {
+        _eliminando = true;
+        _error = null;
+
+        var resultado = await RecetaService.DeleteAsync(Id!.Value);
+
+        if (resultado.IsSuccess)
+        {
+            Snackbar.Add($"Receta '{_titulo}' eliminada correctamente", Severity.Success);
+            Navigation.NavigateTo("/recetas");
+        }
+        else
+        {
+            _error = resultado.Error.Message;
+            _eliminando = false;
         }
     }
 
