@@ -66,25 +66,26 @@ else
 
     <MudGrid>
         <MudItem xs="12" md="4">
-            <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Ingredientes</MudText>
-            <MudPaper Class="pa-4" Elevation="1">
-                @for (var i = 0; i < _receta.Ingredientes.Count; i++)
-                {
-                    var index = i;
-                    var ingrediente = _receta.Ingredientes[index];
-                    <div class="d-flex align-center mb-1">
-                        <MudCheckBox T="bool"
-                                     Value="_ingredientesMarcados[index]"
-                                     ValueChanged="@((bool v) => _ingredientesMarcados[index] = v)"
-                                     Color="Color.Primary"
-                                     Size="Size.Large"/>
-                        <MudText Typo="Typo.body1"
-                                  Style="@(_ingredientesMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
-                            @ingrediente.Nombre — @FormatearCantidad(ingrediente)
-                        </MudText>
-                    </div>
-                }
-            </MudPaper>
+            <MudExpansionPanels Elevation="1">
+                <MudExpansionPanel Text="Ingredientes" @bind-Expanded="_ingredientesExpandido">
+                    @for (var i = 0; i < _receta.Ingredientes.Count; i++)
+                    {
+                        var index = i;
+                        var ingrediente = _receta.Ingredientes[index];
+                        <div class="d-flex align-center mb-1">
+                            <MudCheckBox T="bool"
+                                         Value="_ingredientesMarcados[index]"
+                                         ValueChanged="@((bool v) => _ingredientesMarcados[index] = v)"
+                                         Color="Color.Primary"
+                                         Size="Size.Large"/>
+                            <MudText Typo="Typo.body1"
+                                      Style="@(_ingredientesMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                @ingrediente.Nombre — @FormatearCantidad(ingrediente)
+                            </MudText>
+                        </div>
+                    }
+                </MudExpansionPanel>
+            </MudExpansionPanels>
 
             @if (_receta.Utensilios.Count > 0)
             {
@@ -245,6 +246,7 @@ else
     private List<bool> _miseEnPlaceMarcados = [];
     private int _activeIndex;
     private bool _progresoComprobado;
+    private bool _ingredientesExpandido = true;
 
     private bool _mostrarBotonListo =>
         _pasosOrdenados.Count > 0
@@ -284,8 +286,16 @@ else
         {
             var continuar = await PreguntarSiContinuarAsync();
             _activeIndex = continuar ? _receta.UltimoPasoIndice : 0;
-            StateHasChanged();
         }
+
+        // El estado visual (Mise en Place marcada, Ingredientes colapsado) debe reflejar en
+        // qué fase queda el usuario tanto si cruzó en vivo como si reanuda directamente en
+        // Elaboración (por el diálogo de arriba, o porque la receta no tiene pasos de
+        // Preparación y el paso inicial ya es de Elaboración).
+        if (_pasosOrdenados.Count > 0 && _pasosOrdenados[_activeIndex].Fase == FasePaso.Elaboracion)
+            EntrarEnElaboracion();
+
+        StateHasChanged();
     }
 
     private async Task<bool> PreguntarSiContinuarAsync()
@@ -309,6 +319,7 @@ else
         if (primerIndiceElaboracion >= 0)
         {
             _activeIndex = primerIndiceElaboracion;
+            EntrarEnElaboracion();
             await GuardarProgresoAsync();
         }
     }
@@ -326,9 +337,24 @@ else
     {
         if (_activeIndex < _pasosOrdenados.Count - 1)
         {
+            var faseAnterior = _pasosOrdenados[_activeIndex].Fase;
             _activeIndex++;
+            if (faseAnterior == FasePaso.Preparacion && _pasosOrdenados[_activeIndex].Fase == FasePaso.Elaboracion)
+                EntrarEnElaboracion();
             await GuardarProgresoAsync();
         }
+    }
+
+    /// <summary>
+    /// Se dispara justo al cruzar de Preparación a Elaboración: marca la Mise en Place como
+    /// completada (solo visual de esta sesión, no se persiste) y colapsa Ingredientes para
+    /// dejar sitio a los pasos de elaboración, sin ocultarlo del todo.
+    /// </summary>
+    private void EntrarEnElaboracion()
+    {
+        for (var i = 0; i < _miseEnPlaceMarcados.Count; i++)
+            _miseEnPlaceMarcados[i] = true;
+        _ingredientesExpandido = false;
     }
 
     private async Task GuardarProgresoAsync()
