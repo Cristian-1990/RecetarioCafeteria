@@ -81,12 +81,11 @@ else
             @if (_receta.Utensilios.Count > 0)
             {
                 <MudText Typo="Typo.h5" Class="mb-2 mt-4" Style="color:#3E2723;">Utensilios</MudText>
-                <MudPaper Class="pa-4" Elevation="1">
-                    @foreach (var utensilio in _receta.Utensilios)
-                    {
-                        <MudText Typo="Typo.body1" Class="mb-1">@utensilio</MudText>
-                    }
-                </MudPaper>
+                <div style="background-color:rgba(109,76,65,0.10); border-radius:16px; padding:16px 20px;">
+                    <MudText Typo="Typo.body1" Style="color:#3E2723; line-height:1.9;">
+                        @FormatearUtensilios()
+                    </MudText>
+                </div>
             }
 
         </MudItem>
@@ -271,6 +270,12 @@ else
         if (_activeIndex < _pasosOrdenados.Count - 1)
             _activeIndex++;
     }
+
+    private string FormatearUtensilios() =>
+        string.Join(" · ", (_receta?.Utensilios ?? [])
+            .SelectMany(u => u.Split(','))
+            .Select(u => u.Trim())
+            .Where(u => u.Length > 0));
 
     private static string FormatearCantidad(Ingrediente ingrediente)
     {
