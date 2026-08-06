@@ -80,54 +80,15 @@ else
 
             @if (_receta.Utensilios.Count > 0)
             {
-                <MudText Typo="Typo.h5" Class="mb-2 mt-6" Style="color:#3E2723;">Utensilios</MudText>
+                <MudText Typo="Typo.h5" Class="mb-2 mt-4" Style="color:#3E2723;">Utensilios</MudText>
                 <MudPaper Class="pa-4" Elevation="1">
-                    @for (var i = 0; i < _receta.Utensilios.Count; i++)
+                    @foreach (var utensilio in _receta.Utensilios)
                     {
-                        var index = i;
-                        var utensilio = _receta.Utensilios[index];
-                        <div class="d-flex align-center mb-1">
-                            <MudCheckBox T="bool"
-                                         Value="_utensiliosMarcados[index]"
-                                         ValueChanged="@((bool v) => _utensiliosMarcados[index] = v)"
-                                         Color="Color.Primary"
-                                         Size="Size.Large"/>
-                            <MudText Typo="Typo.body1"
-                                      Style="@(_utensiliosMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
-                                @utensilio
-                            </MudText>
-                        </div>
+                        <MudText Typo="Typo.body1" Class="mb-1">@utensilio</MudText>
                     }
                 </MudPaper>
             }
 
-            @if (_receta.MiseEnPlace.Count > 0)
-            {
-                <MudText Typo="Typo.h5" Class="mb-2 mt-6" Style="color:#3E2723;">Mise en Place</MudText>
-                <MudPaper Class="pa-4" Elevation="1">
-                    @for (var i = 0; i < _receta.MiseEnPlace.Count; i++)
-                    {
-                        var index = i;
-                        var numeroOrden = i + 1;
-                        var agrupacion = _receta.MiseEnPlace[index];
-                        <div class="d-flex align-center mb-2" style="gap:0.5rem;">
-                            <div class="d-flex align-center justify-center flex-shrink-0"
-                                 style="width:28px; height:28px; border-radius:50%; background-color:#6D4C41; color:#FFFFFF; font-size:0.9rem; font-weight:700;">
-                                @numeroOrden
-                            </div>
-                            <MudCheckBox T="bool"
-                                         Value="_miseEnPlaceMarcados[index]"
-                                         ValueChanged="@((bool v) => _miseEnPlaceMarcados[index] = v)"
-                                         Color="Color.Primary"
-                                         Size="Size.Large"/>
-                            <MudText Typo="Typo.body1"
-                                      Style="@(_miseEnPlaceMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
-                                @agrupacion
-                            </MudText>
-                        </div>
-                    }
-                </MudPaper>
-            }
         </MudItem>
 
         <MudItem xs="12" md="8">
@@ -210,6 +171,34 @@ else
                     </ActionContent>
                 </MudStepper>
             </MudPaper>
+
+            @if (_receta.MiseEnPlace.Count > 0)
+            {
+                <MudText Typo="Typo.h5" Class="mb-2 mt-6" Style="color:#3E2723;">Mise en Place</MudText>
+                <MudPaper Class="pa-4" Elevation="1">
+                    @for (var i = 0; i < _receta.MiseEnPlace.Count; i++)
+                    {
+                        var index = i;
+                        var numeroOrden = i + 1;
+                        var agrupacion = _receta.MiseEnPlace[index];
+                        <div class="d-flex align-center mb-2" style="gap:0.5rem;">
+                            <div class="d-flex align-center justify-center flex-shrink-0"
+                                 style="width:28px; height:28px; border-radius:50%; background-color:#6D4C41; color:#FFFFFF; font-size:0.9rem; font-weight:700;">
+                                @numeroOrden
+                            </div>
+                            <MudCheckBox T="bool"
+                                         Value="_miseEnPlaceMarcados[index]"
+                                         ValueChanged="@((bool v) => _miseEnPlaceMarcados[index] = v)"
+                                         Color="Color.Primary"
+                                         Size="Size.Large"/>
+                            <MudText Typo="Typo.body1"
+                                      Style="@(_miseEnPlaceMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                @agrupacion
+                            </MudText>
+                        </div>
+                    }
+                </MudPaper>
+            }
         </MudItem>
     </MudGrid>
 
@@ -239,7 +228,6 @@ else
     private bool _cargando = true;
     private List<Paso> _pasosOrdenados = [];
     private List<bool> _ingredientesMarcados = [];
-    private List<bool> _utensiliosMarcados = [];
     private List<bool> _miseEnPlaceMarcados = [];
     private int _activeIndex;
 
@@ -260,7 +248,6 @@ else
                 .. _receta.Pasos.Where(p => p.Fase == FasePaso.Elaboracion).OrderBy(p => p.Orden)
             ];
             _ingredientesMarcados = _receta.Ingredientes.Select(_ => false).ToList();
-            _utensiliosMarcados = _receta.Utensilios.Select(_ => false).ToList();
             _miseEnPlaceMarcados = _receta.MiseEnPlace.Select(_ => false).ToList();
         }
         _cargando = false;
