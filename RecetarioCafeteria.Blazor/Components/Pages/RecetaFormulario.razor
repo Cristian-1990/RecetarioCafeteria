@@ -42,7 +42,10 @@ else
             <MudSelectItem T="CategoriaReceta" Value="CategoriaReceta.Cafe">Café</MudSelectItem>
         </MudSelect>
 
-        <MudNumericField T="int" @bind-Value="_tiempoMinutos" Label="Tiempo (minutos)" Variant="Variant.Outlined" Min="0" Class="mb-4"/>
+        <div class="d-flex gap-2 mb-4">
+            <MudNumericField T="int" @bind-Value="_tiempoMinutos" Label="Tiempo (minutos)" Variant="Variant.Outlined" Min="0" Class="flex-grow-1"/>
+            <MudNumericField T="int" @bind-Value="_raciones" Label="Raciones" Variant="Variant.Outlined" Min="0" Class="flex-grow-1"/>
+        </div>
 
         <MudTextField T="string" @bind-Value="_fotoUrl" Label="Ruta de la foto (opcional)" Variant="Variant.Outlined" Class="mb-4"/>
 
@@ -125,11 +128,14 @@ else
         {
             var fila = _filasPreparacion[i];
             var index = i;
-            <div @key="fila.Clave" class="d-flex align-center gap-2 mb-2">
-                <MudTextField T="string" @bind-Value="fila.Valor.Descripcion" Label="Descripción" Variant="Variant.Outlined" Class="flex-grow-1"/>
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirPaso(_filasPreparacion, index))"/>
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasPreparacion.Count - 1)" OnClick="@(() => BajarPaso(_filasPreparacion, index))"/>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasPreparacion, fila))"/>
+            <div @key="fila.Clave" class="mb-2">
+                <div class="d-flex align-center gap-2">
+                    <MudTextField T="string" @bind-Value="fila.Valor.Descripcion" Label="Descripción" Variant="Variant.Outlined" Class="flex-grow-1"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirPaso(_filasPreparacion, index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasPreparacion.Count - 1)" OnClick="@(() => BajarPaso(_filasPreparacion, index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasPreparacion, fila))"/>
+                </div>
+                <MudTextField T="string" @bind-Value="fila.Valor.Truco" Label="Truco (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
             </div>
         }
         <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AgregarPaso(_filasPreparacion))">
@@ -143,11 +149,14 @@ else
         {
             var fila = _filasElaboracion[i];
             var index = i;
-            <div @key="fila.Clave" class="d-flex align-center gap-2 mb-2">
-                <MudTextField T="string" @bind-Value="fila.Valor.Descripcion" Label="Descripción" Variant="Variant.Outlined" Class="flex-grow-1"/>
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirPaso(_filasElaboracion, index))"/>
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasElaboracion.Count - 1)" OnClick="@(() => BajarPaso(_filasElaboracion, index))"/>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasElaboracion, fila))"/>
+            <div @key="fila.Clave" class="mb-2">
+                <div class="d-flex align-center gap-2">
+                    <MudTextField T="string" @bind-Value="fila.Valor.Descripcion" Label="Descripción" Variant="Variant.Outlined" Class="flex-grow-1"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirPaso(_filasElaboracion, index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasElaboracion.Count - 1)" OnClick="@(() => BajarPaso(_filasElaboracion, index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasElaboracion, fila))"/>
+                </div>
+                <MudTextField T="string" @bind-Value="fila.Valor.Truco" Label="Truco (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
             </div>
         }
         <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AgregarPaso(_filasElaboracion))">
@@ -193,6 +202,7 @@ else
     private string _titulo = string.Empty;
     private CategoriaReceta _categoria = CategoriaReceta.Bebidas;
     private int _tiempoMinutos;
+    private int _raciones = 4;
     private string _fotoUrl = string.Empty;
     private IReadOnlyCollection<Alergeno> _alergenosSeleccionados = [];
     private string? _notaFinal;
@@ -220,6 +230,7 @@ else
                 _titulo = receta.Titulo;
                 _categoria = receta.Categoria;
                 _tiempoMinutos = receta.TiempoMinutos;
+                _raciones = receta.Raciones;
                 _fotoUrl = receta.FotoUrl;
                 _alergenosSeleccionados = receta.Alergenos;
                 _notaFinal = receta.NotaFinal;
@@ -309,6 +320,7 @@ else
             Titulo = _titulo,
             Categoria = _categoria,
             TiempoMinutos = _tiempoMinutos,
+            Raciones = _raciones,
             FotoUrl = _fotoUrl,
             Ingredientes = _filasIngredientes.Select(f => f.Valor).ToList(),
             Pasos = pasos,

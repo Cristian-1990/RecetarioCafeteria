@@ -12,6 +12,7 @@ public static class RecetaMapper
             Titulo = receta.Titulo,
             Categoria = receta.Categoria,
             TiempoMinutos = receta.TiempoMinutos,
+            Raciones = receta.Raciones,
             FotoUrl = receta.FotoUrl,
             Ingredientes = receta.Ingredientes.Select(i => i.ToEntity()).ToList(),
             Pasos = receta.Pasos.Select(p => p.ToEntity()).ToList(),
@@ -30,6 +31,7 @@ public static class RecetaMapper
             Titulo = entity.Titulo,
             Categoria = entity.Categoria,
             TiempoMinutos = entity.TiempoMinutos,
+            Raciones = entity.Raciones,
             FotoUrl = entity.FotoUrl,
             Ingredientes = entity.Ingredientes.Select(i => i.ToIngrediente()).ToList(),
             Pasos = entity.Pasos.Select(p => p.ToPaso()).ToList(),
@@ -69,7 +71,8 @@ public static class RecetaMapper
             Id = paso.Id,
             Orden = paso.Orden,
             Descripcion = paso.Descripcion,
-            Fase = paso.Fase
+            Fase = paso.Fase,
+            Truco = paso.Truco
         };
     }
 
@@ -80,7 +83,8 @@ public static class RecetaMapper
             Id = entity.Id,
             Orden = entity.Orden,
             Descripcion = entity.Descripcion,
-            Fase = entity.Fase
+            Fase = entity.Fase,
+            Truco = entity.Truco
         };
     }
 }
