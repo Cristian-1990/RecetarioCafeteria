@@ -135,7 +135,7 @@ else
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasPreparacion.Count - 1)" OnClick="@(() => BajarPaso(_filasPreparacion, index))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasPreparacion, fila))"/>
                 </div>
-                <MudTextField T="string" @bind-Value="fila.Valor.Truco" Label="Truco (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
+                <MudTextField T="string" @bind-Value="fila.Valor.Consejo" Label="Consejo (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
             </div>
         }
         <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AgregarPaso(_filasPreparacion))">
@@ -156,7 +156,7 @@ else
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasElaboracion.Count - 1)" OnClick="@(() => BajarPaso(_filasElaboracion, index))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(_filasElaboracion, fila))"/>
                 </div>
-                <MudTextField T="string" @bind-Value="fila.Valor.Truco" Label="Truco (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
+                <MudTextField T="string" @bind-Value="fila.Valor.Consejo" Label="Consejo (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
             </div>
         }
         <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AgregarPaso(_filasElaboracion))">

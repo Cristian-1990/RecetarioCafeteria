@@ -23,8 +23,8 @@
 <MudGrid Class="mb-4">
     <MudItem xs="6" sm="3">
         <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
-                  Elevation="2"
-                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Bebidas) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Bebidas)"
                   @onclick="@(() => FiltrarAsync(CategoriaReceta.Bebidas))">
             <MudIcon Icon="@Icons.Material.Filled.LocalDrink" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
             <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Bebidas</MudText>
@@ -32,8 +32,8 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
-                  Elevation="2"
-                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Reposteria) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Reposteria)"
                   @onclick="@(() => FiltrarAsync(CategoriaReceta.Reposteria))">
             <MudIcon Icon="@Icons.Material.Filled.Cake" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
             <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Repostería</MudText>
@@ -41,8 +41,8 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
-                  Elevation="2"
-                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Salados) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Salados)"
                   @onclick="@(() => FiltrarAsync(CategoriaReceta.Salados))">
             <MudIcon Icon="@Icons.Material.Filled.LunchDining" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
             <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Salados</MudText>
@@ -50,8 +50,8 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
-                  Elevation="2"
-                  Style="cursor:pointer; min-height:120px; border-radius:12px;"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Cafe) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Cafe)"
                   @onclick="@(() => FiltrarAsync(CategoriaReceta.Cafe))">
             <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
             <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Café</MudText>
@@ -144,6 +144,16 @@ else
     protected override async Task OnInitializedAsync()
     {
         await CargarAsync();
+    }
+
+    private bool EsCategoriaActiva(CategoriaReceta categoria) => _categoriaSeleccionada == categoria;
+
+    private string EstiloTarjetaCategoria(CategoriaReceta categoria)
+    {
+        var estiloBase = "cursor:pointer; min-height:120px; border-radius:12px; transition:background-color 0.15s, border-color 0.15s;";
+        return EsCategoriaActiva(categoria)
+            ? $"{estiloBase} border:3px solid #6D4C41; background-color:rgba(109,76,65,0.15);"
+            : $"{estiloBase} border:3px solid transparent;";
     }
 
     private async Task FiltrarAsync(CategoriaReceta? categoria)

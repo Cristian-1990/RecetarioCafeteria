@@ -72,7 +72,7 @@ public static class RecetaMapper
             Orden = paso.Orden,
             Descripcion = paso.Descripcion,
             Fase = paso.Fase,
-            Truco = paso.Truco
+            Consejo = paso.Consejo
         };
     }
 
@@ -84,7 +84,7 @@ public static class RecetaMapper
             Orden = entity.Orden,
             Descripcion = entity.Descripcion,
             Fase = entity.Fase,
-            Truco = entity.Truco
+            Consejo = entity.Consejo
         };
     }
 }
