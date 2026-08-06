@@ -19,7 +19,8 @@ public static class RecetaMapper
             Alergenos = receta.Alergenos.ToList(),
             Utensilios = receta.Utensilios.ToList(),
             MiseEnPlace = receta.MiseEnPlace.ToList(),
-            NotaFinal = receta.NotaFinal
+            NotaFinal = receta.NotaFinal,
+            UltimoPasoIndice = receta.UltimoPasoIndice
         };
     }
 
@@ -38,7 +39,8 @@ public static class RecetaMapper
             Alergenos = entity.Alergenos.ToList(),
             Utensilios = entity.Utensilios.ToList(),
             MiseEnPlace = entity.MiseEnPlace.ToList(),
-            NotaFinal = entity.NotaFinal
+            NotaFinal = entity.NotaFinal,
+            UltimoPasoIndice = entity.UltimoPasoIndice
         };
     }
 

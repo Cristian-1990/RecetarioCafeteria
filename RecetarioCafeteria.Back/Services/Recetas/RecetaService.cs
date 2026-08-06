@@ -64,4 +64,9 @@ public class RecetaService : IRecetaService
     {
         return await _repository.GetByCategoriaAsync(categoria);
     }
+
+    public async Task<Result<Receta, DomainError>> GuardarProgresoAsync(int id, int ultimoPasoIndice)
+    {
+        return await _repository.GuardarProgresoAsync(id, ultimoPasoIndice);
+    }
 }

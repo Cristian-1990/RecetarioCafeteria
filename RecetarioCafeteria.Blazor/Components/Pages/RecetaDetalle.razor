@@ -1,5 +1,7 @@
 @page "/recetas/{Id:int}"
 @inject IRecetaService RecetaService
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
 
 <PageTitle>@(_receta?.Titulo ?? "Receta")</PageTitle>
 
@@ -148,7 +150,7 @@ else
                                                    Color="Color.Primary"
                                                    Class="mt-3"
                                                    StartIcon="@Icons.Material.Filled.Check"
-                                                   Href="/">
+                                                   OnClick="MarcarComoTerminadaAsync">
                                             Hecho
                                         </MudButton>
                                     </MudPaper>
@@ -242,6 +244,7 @@ else
     private List<bool> _ingredientesMarcados = [];
     private List<bool> _miseEnPlaceMarcados = [];
     private int _activeIndex;
+    private bool _progresoComprobado;
 
     private bool _mostrarBotonListo =>
         _pasosOrdenados.Count > 0
@@ -265,23 +268,78 @@ else
         _cargando = false;
     }
 
-    private void SaltarAElaboracion()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // El diálogo de "continuar donde lo dejaste" depende de un circuito interactivo
+        // activo (MudDialog necesita JS interop real), así que no puede dispararse desde
+        // OnInitializedAsync: esa fase también se ejecuta durante el prerender estático,
+        // donde el diálogo no puede mostrarse ni resolverse. OnAfterRenderAsync(firstRender)
+        // solo se llama una vez el componente ya está vivo en el circuito interactivo.
+        if (!firstRender || _progresoComprobado || _receta is null)
+            return;
+
+        _progresoComprobado = true;
+
+        if (_receta.UltimoPasoIndice > 0 && _receta.UltimoPasoIndice < _pasosOrdenados.Count)
+        {
+            var continuar = await PreguntarSiContinuarAsync();
+            _activeIndex = continuar ? _receta.UltimoPasoIndice : 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<bool> PreguntarSiContinuarAsync()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>
+        {
+            { x => x.ContentText, $"Dejaste esta receta en el paso {_receta!.UltimoPasoIndice + 1}. ¿Continuar donde lo dejaste, o empezar desde el principio?" },
+            { x => x.ConfirmText, "Continuar" },
+            { x => x.CancelText, "Empezar de nuevo" },
+            { x => x.ConfirmColor, Color.Primary }
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Progreso guardado", parameters);
+        var resultado = await dialog.Result;
+        return resultado is not null && !resultado.Canceled;
+    }
+
+    private async Task SaltarAElaboracion()
     {
         var primerIndiceElaboracion = _pasosOrdenados.FindIndex(p => p.Fase == FasePaso.Elaboracion);
         if (primerIndiceElaboracion >= 0)
+        {
             _activeIndex = primerIndiceElaboracion;
+            await GuardarProgresoAsync();
+        }
     }
 
-    private void PasoAnterior()
+    private async Task PasoAnterior()
     {
         if (_activeIndex > 0)
+        {
             _activeIndex--;
+            await GuardarProgresoAsync();
+        }
     }
 
-    private void PasoSiguiente()
+    private async Task PasoSiguiente()
     {
         if (_activeIndex < _pasosOrdenados.Count - 1)
+        {
             _activeIndex++;
+            await GuardarProgresoAsync();
+        }
+    }
+
+    private async Task GuardarProgresoAsync()
+    {
+        await RecetaService.GuardarProgresoAsync(Id, _activeIndex);
+    }
+
+    private async Task MarcarComoTerminadaAsync()
+    {
+        await RecetaService.GuardarProgresoAsync(Id, 0);
+        Navigation.NavigateTo("/");
     }
 
     private string FormatearUtensilios() =>

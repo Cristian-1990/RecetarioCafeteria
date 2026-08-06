@@ -14,4 +14,5 @@ public record Receta
     public List<string> Utensilios { get; set; } = [];
     public List<string> MiseEnPlace { get; set; } = [];
     public string? NotaFinal { get; set; }
+    public int UltimoPasoIndice { get; set; }
 }

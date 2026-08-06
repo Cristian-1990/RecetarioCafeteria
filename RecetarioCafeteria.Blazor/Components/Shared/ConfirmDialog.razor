@@ -7,7 +7,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancelar">@CancelText</MudButton>
-        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Confirmar">@ConfirmText</MudButton>
+        <MudButton Color="ConfirmColor" Variant="Variant.Filled" OnClick="Confirmar">@ConfirmText</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -18,6 +18,7 @@
     [Parameter] public string ContentText { get; set; } = string.Empty;
     [Parameter] public string ConfirmText { get; set; } = "Confirmar";
     [Parameter] public string CancelText { get; set; } = "Cancelar";
+    [Parameter] public Color ConfirmColor { get; set; } = Color.Error;
 
     private void Confirmar() => MudDialog.Close(DialogResult.Ok(true));
 

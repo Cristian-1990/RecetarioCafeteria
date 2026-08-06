@@ -12,4 +12,5 @@ public interface IRecetaService
     Task<Result<Receta, DomainError>> UpdateAsync(int id, Receta receta);
     Task<Result<Receta, DomainError>> DeleteAsync(int id);
     Task<IEnumerable<Receta>> GetByCategoriaAsync(CategoriaReceta categoria);
+    Task<Result<Receta, DomainError>> GuardarProgresoAsync(int id, int ultimoPasoIndice);
 }

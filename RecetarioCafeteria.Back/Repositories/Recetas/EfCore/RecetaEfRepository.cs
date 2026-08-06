@@ -175,4 +175,27 @@ public class RecetaEfRepository : IRecetaRepository
             .Select(e => e.ToReceta())
             .ToListAsync();
     }
+
+    public async Task<Result<Receta, DomainError>> GuardarProgresoAsync(int id, int ultimoPasoIndice)
+    {
+        await InitializeAsync();
+        using var context = CreateContext();
+        var entity = await context.Recetas
+            .Include(e => e.Ingredientes)
+            .Include(e => e.Pasos)
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (entity is null)
+            return Result.Failure<Receta, DomainError>(RecetaErrors.NotFound(id));
+        try
+        {
+            entity.UltimoPasoIndice = ultimoPasoIndice;
+            await context.SaveChangesAsync();
+            return Result.Success<Receta, DomainError>(entity.ToReceta());
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error al guardar el progreso de la receta {Id}", id);
+            return Result.Failure<Receta, DomainError>(RecetaErrors.DatabaseError(ex.Message));
+        }
+    }
 }
