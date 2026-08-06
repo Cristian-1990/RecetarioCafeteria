@@ -6,6 +6,7 @@ using RecetarioCafeteria.Back.Mappers;
 using RecetarioCafeteria.Back.Repositories.Recetas.Base;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace RecetarioCafeteria.Back.Repositories.Recetas.EfCore;
 
@@ -66,6 +67,7 @@ public class RecetaEfRepository : IRecetaRepository
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Error al crear la receta {Titulo}", receta.Titulo);
             return Result.Failure<Receta, DomainError>(RecetaErrors.DatabaseError(ex.Message));
         }
     }
@@ -102,6 +104,7 @@ public class RecetaEfRepository : IRecetaRepository
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Error al editar la receta {Id}", id);
             return Result.Failure<Receta, DomainError>(RecetaErrors.DatabaseError(ex.Message));
         }
     }
@@ -122,6 +125,7 @@ public class RecetaEfRepository : IRecetaRepository
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Error al eliminar la receta {Id}", id);
             return Result.Failure<Receta, DomainError>(RecetaErrors.DatabaseError(ex.Message));
         }
     }
