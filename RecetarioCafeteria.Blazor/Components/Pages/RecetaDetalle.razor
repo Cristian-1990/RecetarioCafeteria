@@ -306,6 +306,12 @@ else
         {
             var continuar = await PreguntarSiContinuarAsync();
             _activeIndex = continuar ? _receta.UltimoPasoIndice : 0;
+
+            // Si elige "Empezar de nuevo", el reseteo debe persistir en la base de datos
+            // (no solo en memoria) o el diálogo volverá a aparecer la próxima vez, porque
+            // UltimoPasoIndice seguiría teniendo su valor anterior.
+            if (!continuar)
+                await GuardarProgresoAsync();
         }
 
         // El estado visual (Mise en Place marcada, Ingredientes colapsado) debe reflejar en
