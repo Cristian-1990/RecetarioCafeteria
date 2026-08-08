@@ -87,6 +87,7 @@ public class RecetaEfRepository : IRecetaRepository
             entity.Titulo = receta.Titulo;
             entity.Categoria = receta.Categoria;
             entity.TiempoMinutos = receta.TiempoMinutos;
+            entity.Raciones = receta.Raciones;
             entity.FotoUrl = receta.FotoUrl;
             entity.Alergenos = receta.Alergenos;
             entity.Utensilios = receta.Utensilios;
