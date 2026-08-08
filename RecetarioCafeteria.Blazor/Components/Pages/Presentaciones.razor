@@ -8,6 +8,91 @@
     <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">Presentaciones</MudText>
 </div>
 
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Bebidas) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Bebidas)"
+                  @onclick="@(() => Filtrar(CategoriaReceta.Bebidas))">
+            <MudIcon Icon="@Icons.Material.Filled.LocalDrink" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Bebidas</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Reposteria) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Reposteria)"
+                  @onclick="@(() => Filtrar(CategoriaReceta.Reposteria))">
+            <MudIcon Icon="@Icons.Material.Filled.Cake" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Repostería</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Salados) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Salados)"
+                  @onclick="@(() => Filtrar(CategoriaReceta.Salados))">
+            <MudIcon Icon="@Icons.Material.Filled.LunchDining" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Salados</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <MudPaper Class="pa-4 d-flex flex-column align-center justify-center"
+                  Elevation="@(EsCategoriaActiva(CategoriaReceta.Cafe) ? 6 : 2)"
+                  Style="@EstiloTarjetaCategoria(CategoriaReceta.Cafe)"
+                  @onclick="@(() => Filtrar(CategoriaReceta.Cafe))">
+            <MudIcon Icon="@Icons.Material.Filled.LocalCafe" Style="font-size:2.5rem; color:#6D4C41;" Class="mb-2"/>
+            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600;">Café</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<div class="d-flex justify-center mb-4">
+    <MudPaper Elevation="3" Style="border-radius:9999px; max-width:400px; width:100%; padding:2px 20px;">
+        <MudTextField T="string"
+                      @bind-Value="_busqueda"
+                      Immediate="true"
+                      Placeholder="Buscar receta..."
+                      Variant="Variant.Text"
+                      Underline="false"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"/>
+    </MudPaper>
+</div>
+
+<div class="d-flex flex-wrap justify-center gap-2 mb-4">
+    <MudChip T="string" Color="@(_categoriaSeleccionada is null ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada is null ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => Filtrar(null))">
+        Todas
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Bebidas ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Bebidas ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => Filtrar(CategoriaReceta.Bebidas))">
+        Bebidas
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Reposteria ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Reposteria ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => Filtrar(CategoriaReceta.Reposteria))">
+        Repostería
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Salados ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Salados ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => Filtrar(CategoriaReceta.Salados))">
+        Salados
+    </MudChip>
+    <MudChip T="string" Color="@(_categoriaSeleccionada == CategoriaReceta.Cafe ? Color.Primary : Color.Default)"
+             Variant="@(_categoriaSeleccionada == CategoriaReceta.Cafe ? Variant.Filled : Variant.Outlined)"
+             Style="font-size:1rem; padding:6px 4px;"
+             OnClick="@(() => Filtrar(CategoriaReceta.Cafe))">
+        Café
+    </MudChip>
+</div>
+
 @if (_cargando)
 {
     <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
@@ -16,10 +101,14 @@ else if (_presentaciones.Count == 0)
 {
     <MudAlert Severity="Severity.Info">Todavía no se ha creado ninguna presentación.</MudAlert>
 }
+else if (!_presentacionesFiltradas.Any())
+{
+    <MudAlert Severity="Severity.Info">No se han encontrado presentaciones con estos filtros.</MudAlert>
+}
 else
 {
     <MudGrid>
-        @foreach (var item in _presentaciones)
+        @foreach (var item in _presentacionesFiltradas)
         {
             <MudItem xs="12" sm="6" md="4">
                 <MudCard Elevation="2" Style="height:100%; display:flex; flex-direction:column;">
@@ -34,7 +123,8 @@ else
                         </div>
                     }
                     <MudCardContent Style="flex-grow:1;">
-                        <MudText Typo="Typo.h6" Style="color:#3E2723;">@item.RecetaTitulo</MudText>
+                        <MudText Typo="Typo.h6" Style="color:#3E2723;">@item.Receta.Titulo</MudText>
+                        <MudText Typo="Typo.body2" Style="color:#6D4C41;">@item.Receta.Categoria</MudText>
                     </MudCardContent>
                     <MudCardActions>
                         <MudButton Variant="Variant.Filled"
@@ -53,22 +143,43 @@ else
 
 @code {
     private List<PresentacionConReceta> _presentaciones = [];
+    private CategoriaReceta? _categoriaSeleccionada;
     private bool _cargando = true;
+    private string _busqueda = string.Empty;
+
+    private IEnumerable<PresentacionConReceta> _presentacionesFiltradas =>
+        _presentaciones
+            .Where(p => _categoriaSeleccionada is null || p.Receta.Categoria == _categoriaSeleccionada)
+            .Where(p => string.IsNullOrWhiteSpace(_busqueda) || p.Receta.Titulo.Contains(_busqueda, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
+        // Presentacion solo guarda RecetaId (no hay navegación a Receta), así que para mostrar
+        // título y categoría se cruzan ambas listas en memoria: 2 consultas en total en vez de
+        // 1 + N (una por presentación) como antes.
         var presentaciones = await PresentacionService.GetAllAsync();
+        var recetas = await RecetaService.GetAllAsync();
+        var recetasPorId = recetas.ToDictionary(r => r.Id);
 
-        var lista = new List<PresentacionConReceta>();
-        foreach (var presentacion in presentaciones)
-        {
-            var receta = await RecetaService.GetByIdAsync(presentacion.RecetaId);
-            lista.Add(new PresentacionConReceta(presentacion, receta.IsSuccess ? receta.Value.Titulo : "Receta desconocida"));
-        }
+        _presentaciones = presentaciones
+            .Where(p => recetasPorId.ContainsKey(p.RecetaId))
+            .Select(p => new PresentacionConReceta(p, recetasPorId[p.RecetaId]))
+            .ToList();
 
-        _presentaciones = lista;
         _cargando = false;
     }
 
-    private sealed record PresentacionConReceta(Presentacion Presentacion, string RecetaTitulo);
+    private bool EsCategoriaActiva(CategoriaReceta categoria) => _categoriaSeleccionada == categoria;
+
+    private string EstiloTarjetaCategoria(CategoriaReceta categoria)
+    {
+        var estiloBase = "cursor:pointer; min-height:120px; border-radius:12px; transition:background-color 0.15s, border-color 0.15s;";
+        return EsCategoriaActiva(categoria)
+            ? $"{estiloBase} border:3px solid #6D4C41; background-color:rgba(109,76,65,0.15);"
+            : $"{estiloBase} border:3px solid transparent;";
+    }
+
+    private void Filtrar(CategoriaReceta? categoria) => _categoriaSeleccionada = categoria;
+
+    private sealed record PresentacionConReceta(Presentacion Presentacion, Receta Receta);
 }
