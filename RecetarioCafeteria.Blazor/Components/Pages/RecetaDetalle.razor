@@ -349,14 +349,16 @@ else
 
     /// <summary>
     /// Se dispara justo al cruzar de Preparación a Elaboración: marca la Mise en Place como
-    /// completada (solo visual de esta sesión, no se persiste) y colapsa Ingredientes para
-    /// dejar sitio a los pasos de elaboración, sin ocultarlo del todo.
+    /// completada (solo visual de esta sesión, no se persiste) y colapsa Ingredientes y la
+    /// Mise en Place para dejar sitio a los pasos de elaboración, sin ocultarlos del todo:
+    /// el usuario puede reabrirlos manualmente si los necesita.
     /// </summary>
     private void EntrarEnElaboracion()
     {
         for (var i = 0; i < _miseEnPlaceMarcados.Count; i++)
             _miseEnPlaceMarcados[i] = true;
         _ingredientesExpandido = false;
+        _preparacionExpandido = false;
     }
 
     private async Task GuardarProgresoAsync()
