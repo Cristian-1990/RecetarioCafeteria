@@ -1,10 +1,13 @@
 using RecetarioCafeteria.Back.Entity;
 using RecetarioCafeteria.Back.Infrastructure;
 using RecetarioCafeteria.Back.Models;
+using RecetarioCafeteria.Back.Repositories.Presentaciones.Base;
 using RecetarioCafeteria.Back.Repositories.Recetas.Base;
 using RecetarioCafeteria.Back.Seed;
+using RecetarioCafeteria.Back.Services.Presentaciones;
 using RecetarioCafeteria.Back.Services.Recetas;
 using RecetarioCafeteria.Back.Validators.Common;
+using RecetarioCafeteria.Back.Validators.Presentaciones;
 using RecetarioCafeteria.Back.Validators.Recetas;
 using RecetarioCafeteria.Blazor.Components;
 using MudBlazor.Services;
@@ -45,6 +48,9 @@ try
     builder.Services.AddSingleton(provider.GetService<IRecetaRepository>()!);
     builder.Services.AddScoped<IRecetaService, RecetaService>();
     builder.Services.AddScoped<IValidador<Receta>, RecetaValidador>();
+    builder.Services.AddSingleton(provider.GetService<IPresentacionRepository>()!);
+    builder.Services.AddScoped<IPresentacionService, PresentacionService>();
+    builder.Services.AddScoped<IValidador<Presentacion>, PresentacionValidador>();
 
     var app = builder.Build();
 

@@ -1,5 +1,6 @@
 @page "/recetas/{Id:int}"
 @inject IRecetaService RecetaService
+@inject IPresentacionService PresentacionService
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 
@@ -29,39 +30,49 @@ else
         Volver al listado
     </MudButton>
 
-    <div class="d-flex align-center mb-6" style="gap:1.5rem;">
-        @if (!string.IsNullOrWhiteSpace(_receta.FotoUrl))
-        {
-            <MudImage Src="@_receta.FotoUrl"
-                      Alt="@_receta.Titulo"
-                      ObjectFit="ObjectFit.Cover"
-                      Style="width:160px; height:160px; border-radius:12px; flex-shrink:0;"/>
-        }
-        else
-        {
-            <div class="d-flex align-center justify-center flex-shrink-0"
-                 style="width:160px; height:160px; background-color:#F5F0EB; border-radius:12px;">
-                <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="font-size:4rem; color:#6D4C41;"/>
-            </div>
-        }
-        <div>
-            <div style="background-color:rgba(109,76,65,0.10); border-radius:12px; padding:8px 16px; display:inline-block;">
-                <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">@_receta.Titulo</MudText>
-            </div>
-            <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Class="mt-2">
-                @_receta.Categoria
-            </MudChip>
-            <div class="d-flex align-center mt-2" style="gap:1.25rem;">
-                <div class="d-flex align-center">
-                    <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-1"/>
-                    <MudText Typo="Typo.subtitle1">@_receta.TiempoMinutos min</MudText>
+    <div class="d-flex align-center justify-space-between mb-6" style="gap:1.5rem;">
+        <div class="d-flex align-center" style="gap:1.5rem;">
+            @if (!string.IsNullOrWhiteSpace(_receta.FotoUrl))
+            {
+                <MudImage Src="@_receta.FotoUrl"
+                          Alt="@_receta.Titulo"
+                          ObjectFit="ObjectFit.Cover"
+                          Style="width:160px; height:160px; border-radius:12px; flex-shrink:0;"/>
+            }
+            else
+            {
+                <div class="d-flex align-center justify-center flex-shrink-0"
+                     style="width:160px; height:160px; background-color:#F5F0EB; border-radius:12px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="font-size:4rem; color:#6D4C41;"/>
                 </div>
-                <div class="d-flex align-center">
-                    <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-1"/>
-                    <MudText Typo="Typo.subtitle1">@_receta.Raciones raciones</MudText>
+            }
+            <div>
+                <div style="background-color:rgba(109,76,65,0.10); border-radius:12px; padding:8px 16px; display:inline-block;">
+                    <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">@_receta.Titulo</MudText>
+                </div>
+                <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Class="mt-2">
+                    @_receta.Categoria
+                </MudChip>
+                <div class="d-flex align-center mt-2" style="gap:1.25rem;">
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-1"/>
+                        <MudText Typo="Typo.subtitle1">@_receta.TiempoMinutos min</MudText>
+                    </div>
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-1"/>
+                        <MudText Typo="Typo.subtitle1">@_receta.Raciones raciones</MudText>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.PhotoCamera"
+                   Class="flex-shrink-0"
+                   Href="@(_tienePresentacion ? $"/recetas/{Id}/presentacion" : $"/recetas/{Id}/presentacion/editar")">
+            @(_tienePresentacion ? "Ver presentación" : "Añadir presentación")
+        </MudButton>
     </div>
 
     <MudGrid>
@@ -249,6 +260,7 @@ else
     private bool _progresoComprobado;
     private bool _ingredientesExpandido = true;
     private bool _preparacionExpandido = true;
+    private bool _tienePresentacion;
 
     private bool _mostrarBotonListo =>
         _pasosOrdenados.Count > 0
@@ -268,6 +280,9 @@ else
             ];
             _ingredientesMarcados = _receta.Ingredientes.Select(_ => false).ToList();
             _miseEnPlaceMarcados = _receta.MiseEnPlace.Select(_ => false).ToList();
+
+            var presentacion = await PresentacionService.GetByRecetaIdAsync(Id);
+            _tienePresentacion = presentacion.IsSuccess;
         }
         _cargando = false;
     }

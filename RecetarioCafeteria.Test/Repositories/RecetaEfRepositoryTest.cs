@@ -1,5 +1,6 @@
 using RecetarioCafeteria.Back.Errors.Recetas;
 using RecetarioCafeteria.Back.Models;
+using RecetarioCafeteria.Back.Repositories.Presentaciones.EfCore;
 using RecetarioCafeteria.Back.Repositories.Recetas.EfCore;
 using FluentAssertions;
 
@@ -132,6 +133,34 @@ public class RecetaEfRepositoryTest
         resultado.IsSuccess.Should().BeTrue();
         var comprobar = await _repository.GetByIdAsync(creada.Value.Id);
         comprobar.IsFailure.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task DeleteAsync_RenumeraPresentacionDeRecetaPosterior()
+    {
+        // Arrange: dos recetas, la segunda con presentación; al borrar la primera,
+        // el Id de la segunda se desplaza en -1 y la presentación debe seguirla.
+        await _repository.CreateAsync(RecetaValida());
+        var segunda = await _repository.CreateAsync(RecetaValida() with { Titulo = "Carrot cake" });
+
+        var presentacionRepository = new PresentacionEfRepository(_connectionString);
+        await presentacionRepository.CreateAsync(new Presentacion
+        {
+            RecetaId = segunda.Value.Id,
+            FotoUrl = "carrot-cake-frosting.jpg",
+            Pasos = [new PasoPresentacion { Orden = 1, Descripcion = "Cubrir con el frosting" }]
+        });
+
+        // Act
+        await _repository.DeleteAsync(1);
+
+        // Assert
+        var recetaRenumerada = await _repository.GetByIdAsync(segunda.Value.Id - 1);
+        recetaRenumerada.IsSuccess.Should().BeTrue();
+        recetaRenumerada.Value.Titulo.Should().Be("Carrot cake");
+
+        var presentacion = await presentacionRepository.GetByRecetaIdAsync(segunda.Value.Id - 1);
+        presentacion.IsSuccess.Should().BeTrue();
     }
 
     [Test]

@@ -157,6 +157,7 @@ public class RecetaEfRepository : IRecetaRepository
             var idNuevo = idActual - 1;
             await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Pasos SET RecetaId = {idNuevo} WHERE RecetaId = {idActual}");
             await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Ingredientes SET RecetaId = {idNuevo} WHERE RecetaId = {idActual}");
+            await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Presentaciones SET RecetaId = {idNuevo} WHERE RecetaId = {idActual}");
             await context.Database.ExecuteSqlInterpolatedAsync($"UPDATE Recetas SET Id = {idNuevo} WHERE Id = {idActual}");
         }
 

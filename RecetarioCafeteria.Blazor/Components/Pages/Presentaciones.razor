@@ -1,0 +1,74 @@
+@page "/presentaciones"
+@inject IPresentacionService PresentacionService
+@inject IRecetaService RecetaService
+
+<PageTitle>Presentaciones</PageTitle>
+
+<div class="mb-4" style="background-color:rgba(109,76,65,0.10); border-radius:12px; padding:16px 24px;">
+    <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">Presentaciones</MudText>
+</div>
+
+@if (_cargando)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_presentaciones.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">Todavía no se ha creado ninguna presentación.</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var item in _presentaciones)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2" Style="height:100%; display:flex; flex-direction:column;">
+                    @if (!string.IsNullOrWhiteSpace(item.Presentacion.FotoUrl))
+                    {
+                        <MudCardMedia Image="@item.Presentacion.FotoUrl" Height="160"/>
+                    }
+                    else
+                    {
+                        <div class="d-flex align-center justify-center" style="height:160px; background-color:#F5F0EB;">
+                            <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Style="font-size:3rem; color:#6D4C41;"/>
+                        </div>
+                    }
+                    <MudCardContent Style="flex-grow:1;">
+                        <MudText Typo="Typo.h6" Style="color:#3E2723;">@item.RecetaTitulo</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   FullWidth="true"
+                                   EndIcon="@Icons.Material.Filled.ChevronRight"
+                                   Href="@($"/recetas/{item.Presentacion.RecetaId}/presentacion")">
+                            Ver presentación
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private List<PresentacionConReceta> _presentaciones = [];
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var presentaciones = await PresentacionService.GetAllAsync();
+
+        var lista = new List<PresentacionConReceta>();
+        foreach (var presentacion in presentaciones)
+        {
+            var receta = await RecetaService.GetByIdAsync(presentacion.RecetaId);
+            lista.Add(new PresentacionConReceta(presentacion, receta.IsSuccess ? receta.Value.Titulo : "Receta desconocida"));
+        }
+
+        _presentaciones = lista;
+        _cargando = false;
+    }
+
+    private sealed record PresentacionConReceta(Presentacion Presentacion, string RecetaTitulo);
+}
