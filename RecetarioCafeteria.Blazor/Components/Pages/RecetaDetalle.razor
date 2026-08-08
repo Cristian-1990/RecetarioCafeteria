@@ -189,30 +189,31 @@ else
 
             @if (_receta.MiseEnPlace.Count > 0)
             {
-                <MudText Typo="Typo.h5" Class="mb-2 mt-6" Style="color:#3E2723;">Mise en Place</MudText>
-                <MudPaper Class="pa-4" Elevation="1">
-                    @for (var i = 0; i < _receta.MiseEnPlace.Count; i++)
-                    {
-                        var index = i;
-                        var numeroOrden = i + 1;
-                        var agrupacion = _receta.MiseEnPlace[index];
-                        <div class="d-flex align-center mb-2" style="gap:0.5rem;">
-                            <div class="d-flex align-center justify-center flex-shrink-0"
-                                 style="width:28px; height:28px; border-radius:50%; background-color:#6D4C41; color:#FFFFFF; font-size:0.9rem; font-weight:700;">
-                                @numeroOrden
+                <MudExpansionPanels Class="mt-6" Elevation="1">
+                    <MudExpansionPanel Text="Mise en Place" @bind-Expanded="_preparacionExpandido">
+                        @for (var i = 0; i < _receta.MiseEnPlace.Count; i++)
+                        {
+                            var index = i;
+                            var numeroOrden = i + 1;
+                            var agrupacion = _receta.MiseEnPlace[index];
+                            <div class="d-flex align-center mb-2" style="gap:0.5rem;">
+                                <div class="d-flex align-center justify-center flex-shrink-0"
+                                     style="width:28px; height:28px; border-radius:50%; background-color:#6D4C41; color:#FFFFFF; font-size:0.9rem; font-weight:700;">
+                                    @numeroOrden
+                                </div>
+                                <MudCheckBox T="bool"
+                                             Value="_miseEnPlaceMarcados[index]"
+                                             ValueChanged="@((bool v) => _miseEnPlaceMarcados[index] = v)"
+                                             Color="Color.Primary"
+                                             Size="Size.Large"/>
+                                <MudText Typo="Typo.body1"
+                                          Style="@(_miseEnPlaceMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                    @agrupacion
+                                </MudText>
                             </div>
-                            <MudCheckBox T="bool"
-                                         Value="_miseEnPlaceMarcados[index]"
-                                         ValueChanged="@((bool v) => _miseEnPlaceMarcados[index] = v)"
-                                         Color="Color.Primary"
-                                         Size="Size.Large"/>
-                            <MudText Typo="Typo.body1"
-                                      Style="@(_miseEnPlaceMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
-                                @agrupacion
-                            </MudText>
-                        </div>
-                    }
-                </MudPaper>
+                        }
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
             }
         </MudItem>
     </MudGrid>
@@ -247,6 +248,7 @@ else
     private int _activeIndex;
     private bool _progresoComprobado;
     private bool _ingredientesExpandido = true;
+    private bool _preparacionExpandido = true;
 
     private bool _mostrarBotonListo =>
         _pasosOrdenados.Count > 0
