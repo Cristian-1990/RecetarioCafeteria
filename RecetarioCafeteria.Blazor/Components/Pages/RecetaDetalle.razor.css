@@ -1,0 +1,5 @@
+::deep .mud-stepper-content {
+    margin-inline-start: 0;
+    padding-inline-start: 0;
+    border-inline-start: none;
+}

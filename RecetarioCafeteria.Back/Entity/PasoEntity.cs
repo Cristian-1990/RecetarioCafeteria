@@ -8,6 +8,7 @@ public class PasoEntity
     public int Orden { get; set; }
     public string Descripcion { get; set; } = string.Empty;
     public FasePaso Fase { get; set; }
+    public string? Consejo { get; set; }
 
     public int RecetaId { get; set; }
     public RecetaEntity Receta { get; set; } = null!;

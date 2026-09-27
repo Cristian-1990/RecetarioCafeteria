@@ -3,6 +3,7 @@ using RecetarioCafeteria.Back.Errors.Common;
 using RecetarioCafeteria.Back.Models;
 using RecetarioCafeteria.Back.Repositories.Recetas.Base;
 using RecetarioCafeteria.Back.Validators.Common;
+using Serilog;
 
 namespace RecetarioCafeteria.Back.Services.Recetas;
 
@@ -33,7 +34,10 @@ public class RecetaService : IRecetaService
         if (validacion.IsFailure)
             return validacion;
 
-        return await _repository.CreateAsync(receta);
+        var resultado = await _repository.CreateAsync(receta);
+        if (resultado.IsSuccess)
+            Log.Information("Receta creada: Id={Id}, Titulo={Titulo}", resultado.Value.Id, resultado.Value.Titulo);
+        return resultado;
     }
 
     public async Task<Result<Receta, DomainError>> UpdateAsync(int id, Receta receta)
@@ -42,16 +46,27 @@ public class RecetaService : IRecetaService
         if (validacion.IsFailure)
             return validacion;
 
-        return await _repository.UpdateAsync(id, receta);
+        var resultado = await _repository.UpdateAsync(id, receta);
+        if (resultado.IsSuccess)
+            Log.Information("Receta editada: Id={Id}, Titulo={Titulo}", id, receta.Titulo);
+        return resultado;
     }
 
     public async Task<Result<Receta, DomainError>> DeleteAsync(int id)
     {
-        return await _repository.DeleteAsync(id);
+        var resultado = await _repository.DeleteAsync(id);
+        if (resultado.IsSuccess)
+            Log.Information("Receta eliminada: Id={Id}", id);
+        return resultado;
     }
 
     public async Task<IEnumerable<Receta>> GetByCategoriaAsync(CategoriaReceta categoria)
     {
         return await _repository.GetByCategoriaAsync(categoria);
+    }
+
+    public async Task<Result<Receta, DomainError>> GuardarProgresoAsync(int id, int ultimoPasoIndice)
+    {
+        return await _repository.GuardarProgresoAsync(id, ultimoPasoIndice);
     }
 }

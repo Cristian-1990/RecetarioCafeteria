@@ -12,9 +12,15 @@ public static class RecetaMapper
             Titulo = receta.Titulo,
             Categoria = receta.Categoria,
             TiempoMinutos = receta.TiempoMinutos,
+            Raciones = receta.Raciones,
             FotoUrl = receta.FotoUrl,
             Ingredientes = receta.Ingredientes.Select(i => i.ToEntity()).ToList(),
-            Pasos = receta.Pasos.Select(p => p.ToEntity()).ToList()
+            Pasos = receta.Pasos.Select(p => p.ToEntity()).ToList(),
+            Alergenos = receta.Alergenos.ToList(),
+            Utensilios = receta.Utensilios.ToList(),
+            MiseEnPlace = receta.MiseEnPlace.ToList(),
+            NotaFinal = receta.NotaFinal,
+            UltimoPasoIndice = receta.UltimoPasoIndice
         };
     }
 
@@ -26,9 +32,15 @@ public static class RecetaMapper
             Titulo = entity.Titulo,
             Categoria = entity.Categoria,
             TiempoMinutos = entity.TiempoMinutos,
+            Raciones = entity.Raciones,
             FotoUrl = entity.FotoUrl,
             Ingredientes = entity.Ingredientes.Select(i => i.ToIngrediente()).ToList(),
-            Pasos = entity.Pasos.Select(p => p.ToPaso()).ToList()
+            Pasos = entity.Pasos.Select(p => p.ToPaso()).ToList(),
+            Alergenos = entity.Alergenos.ToList(),
+            Utensilios = entity.Utensilios.ToList(),
+            MiseEnPlace = entity.MiseEnPlace.ToList(),
+            NotaFinal = entity.NotaFinal,
+            UltimoPasoIndice = entity.UltimoPasoIndice
         };
     }
 
@@ -61,7 +73,8 @@ public static class RecetaMapper
             Id = paso.Id,
             Orden = paso.Orden,
             Descripcion = paso.Descripcion,
-            Fase = paso.Fase
+            Fase = paso.Fase,
+            Consejo = paso.Consejo
         };
     }
 
@@ -72,7 +85,8 @@ public static class RecetaMapper
             Id = entity.Id,
             Orden = entity.Orden,
             Descripcion = entity.Descripcion,
-            Fase = entity.Fase
+            Fase = entity.Fase,
+            Consejo = entity.Consejo
         };
     }
 }

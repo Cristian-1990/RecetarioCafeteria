@@ -1,0 +1,173 @@
+@page "/recetas/{RecetaId:int}/presentacion/editar"
+@inject IRecetaService RecetaService
+@inject IPresentacionService PresentacionService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>@(_esNueva ? "Nueva presentación" : "Editar presentación")</PageTitle>
+
+@if (_cargando)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+else if (_recetaNoEncontrada)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">No se ha encontrado esta receta.</MudAlert>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.ArrowBack"
+               Href="/recetas">
+        Volver al listado
+    </MudButton>
+}
+else
+{
+    <MudText Typo="Typo.h4" Class="mb-4" Style="color:#3E2723;">
+        @(_esNueva ? "Nueva presentación" : "Editar presentación") — @_receta!.Titulo
+    </MudText>
+
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4" Style="white-space:pre-line;">@_error</MudAlert>
+    }
+
+    <MudPaper Class="pa-6 mb-6" Elevation="2">
+        <MudTextField T="string" @bind-Value="_fotoUrl" Label="Ruta de la foto (opcional)" Variant="Variant.Outlined"/>
+    </MudPaper>
+
+    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Pasos</MudText>
+    <MudPaper Class="pa-4 mb-6" Elevation="1">
+        @for (var i = 0; i < _filasPasos.Count; i++)
+        {
+            var fila = _filasPasos[i];
+            var index = i;
+            <div @key="fila.Clave" class="mb-2">
+                <div class="d-flex align-center gap-2">
+                    <MudTextField T="string" @bind-Value="fila.Descripcion" Label="Descripción" Variant="Variant.Outlined" Class="flex-grow-1"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(index == 0)" OnClick="@(() => SubirPaso(index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(index == _filasPasos.Count - 1)" OnClick="@(() => BajarPaso(index))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => EliminarPaso(fila))"/>
+                </div>
+                <MudTextField T="string" @bind-Value="fila.Consejo" Label="Consejo (opcional)" Variant="Variant.Outlined" Class="mt-1"/>
+            </div>
+        }
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AgregarPaso">
+            Añadir paso
+        </MudButton>
+    </MudPaper>
+
+    <div class="d-flex gap-2">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Size="Size.Large"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   OnClick="GuardarAsync"
+                   Disabled="@_guardando">
+            Guardar
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   Size="Size.Large"
+                   Href="@(_esNueva ? $"/recetas/{RecetaId}" : $"/recetas/{RecetaId}/presentacion")">
+            Cancelar
+        </MudButton>
+    </div>
+}
+
+@code {
+    [Parameter] public int RecetaId { get; set; }
+
+    private bool _esNueva = true;
+    private int _presentacionId;
+
+    private Receta? _receta;
+    private string _fotoUrl = string.Empty;
+    private List<FilaPaso> _filasPasos = [];
+
+    private bool _cargando = true;
+    private bool _recetaNoEncontrada;
+    private bool _guardando;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var receta = await RecetaService.GetByIdAsync(RecetaId);
+        if (receta.IsFailure)
+        {
+            _recetaNoEncontrada = true;
+            _cargando = false;
+            return;
+        }
+        _receta = receta.Value;
+
+        var presentacion = await PresentacionService.GetByRecetaIdAsync(RecetaId);
+        if (presentacion.IsSuccess)
+        {
+            _esNueva = false;
+            _presentacionId = presentacion.Value.Id;
+            _fotoUrl = presentacion.Value.FotoUrl;
+            _filasPasos = presentacion.Value.Pasos
+                .OrderBy(p => p.Orden)
+                .Select(p => new FilaPaso { Descripcion = p.Descripcion, Consejo = p.Consejo })
+                .ToList();
+        }
+
+        _cargando = false;
+    }
+
+    private void AgregarPaso() => _filasPasos.Add(new FilaPaso());
+
+    private void EliminarPaso(FilaPaso fila) => _filasPasos.Remove(fila);
+
+    private void SubirPaso(int index)
+    {
+        if (index > 0)
+            (_filasPasos[index], _filasPasos[index - 1]) = (_filasPasos[index - 1], _filasPasos[index]);
+    }
+
+    private void BajarPaso(int index)
+    {
+        if (index < _filasPasos.Count - 1)
+            (_filasPasos[index], _filasPasos[index + 1]) = (_filasPasos[index + 1], _filasPasos[index]);
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _error = null;
+
+        var pasos = _filasPasos
+            .Select((fila, index) => new PasoPresentacion { Orden = index + 1, Descripcion = fila.Descripcion, Consejo = fila.Consejo })
+            .ToList();
+
+        var presentacion = new Presentacion
+        {
+            Id = _presentacionId,
+            RecetaId = RecetaId,
+            FotoUrl = _fotoUrl,
+            Pasos = pasos
+        };
+
+        var resultado = _esNueva
+            ? await PresentacionService.CreateAsync(presentacion)
+            : await PresentacionService.UpdateAsync(_presentacionId, presentacion);
+
+        if (resultado.IsSuccess)
+        {
+            Snackbar.Add(_esNueva ? "Presentación creada correctamente" : "Presentación actualizada correctamente", Severity.Success);
+            Navigation.NavigateTo($"/recetas/{RecetaId}/presentacion");
+        }
+        else
+        {
+            _error = resultado.Error.Message;
+            _guardando = false;
+        }
+    }
+
+    private sealed class FilaPaso
+    {
+        public Guid Clave { get; } = Guid.NewGuid();
+        public string Descripcion { get; set; } = string.Empty;
+        public string? Consejo { get; set; }
+    }
+}

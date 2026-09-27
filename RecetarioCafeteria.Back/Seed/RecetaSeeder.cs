@@ -23,7 +23,7 @@ public static class RecetaSeeder
             new Receta
             {
                 Titulo = "Café con leche",
-                Categoria = CategoriaReceta.Cafeteria,
+                Categoria = CategoriaReceta.Cafe,
                 TiempoMinutos = 5,
                 FotoUrl = "https://example.com/fotos/cafe-con-leche.jpg",
                 Ingredientes =
@@ -44,7 +44,7 @@ public static class RecetaSeeder
             new Receta
             {
                 Titulo = "Té verde",
-                Categoria = CategoriaReceta.Infusiones,
+                Categoria = CategoriaReceta.Bebidas,
                 TiempoMinutos = 4,
                 FotoUrl = "https://example.com/fotos/te-verde.jpg",
                 Ingredientes =
@@ -62,7 +62,7 @@ public static class RecetaSeeder
             new Receta
             {
                 Titulo = "Tostada con aguacate",
-                Categoria = CategoriaReceta.Otras,
+                Categoria = CategoriaReceta.Salados,
                 TiempoMinutos = 10,
                 FotoUrl = "https://example.com/fotos/tostada-aguacate.jpg",
                 Ingredientes =

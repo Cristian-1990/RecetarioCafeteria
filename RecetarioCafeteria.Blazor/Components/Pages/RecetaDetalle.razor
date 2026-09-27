@@ -1,5 +1,8 @@
 @page "/recetas/{Id:int}"
 @inject IRecetaService RecetaService
+@inject IPresentacionService PresentacionService
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
 
 <PageTitle>@(_receta?.Titulo ?? "Receta")</PageTitle>
 
@@ -27,68 +30,215 @@ else
         Volver al listado
     </MudButton>
 
-    <MudGrid Class="mb-6">
-        <MudItem xs="12" sm="4">
+    <div class="d-flex align-center justify-space-between mb-6" style="gap:1.5rem;">
+        <div class="d-flex align-center" style="gap:1.5rem;">
             @if (!string.IsNullOrWhiteSpace(_receta.FotoUrl))
             {
                 <MudImage Src="@_receta.FotoUrl"
                           Alt="@_receta.Titulo"
                           ObjectFit="ObjectFit.Cover"
-                          Style="width:100%; aspect-ratio:1; border-radius:8px;"/>
+                          Style="width:160px; height:160px; border-radius:12px; flex-shrink:0;"/>
             }
             else
             {
-                <div class="d-flex align-center justify-center"
-                     style="width:100%; aspect-ratio:1; background-color:#F5F0EB; border-radius:8px;">
-                    <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="font-size:5rem; color:#6D4C41;"/>
+                <div class="d-flex align-center justify-center flex-shrink-0"
+                     style="width:160px; height:160px; background-color:#F5F0EB; border-radius:12px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Coffee" Style="font-size:4rem; color:#6D4C41;"/>
                 </div>
             }
-        </MudItem>
-        <MudItem xs="12" sm="8">
-            <MudText Typo="Typo.h4" Style="color:#3E2723;">@_receta.Titulo</MudText>
-            <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Class="mt-2">
-                @_receta.Categoria
-            </MudChip>
-            <div class="d-flex align-center mt-3">
-                <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-1"/>
-                <MudText Typo="Typo.subtitle1">@_receta.TiempoMinutos min</MudText>
+            <div>
+                <div style="background-color:rgba(109,76,65,0.10); border-radius:12px; padding:8px 16px; display:inline-block;">
+                    <MudText Typo="Typo.h4" Style="color:#3E2723; margin:0;">@_receta.Titulo</MudText>
+                </div>
+                <MudChip T="string" Color="Color.Primary" Variant="Variant.Filled" Class="mt-2">
+                    @_receta.Categoria
+                </MudChip>
+                <div class="d-flex align-center mt-2" style="gap:1.25rem;">
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-1"/>
+                        <MudText Typo="Typo.subtitle1">@_receta.TiempoMinutos min</MudText>
+                    </div>
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-1"/>
+                        <MudText Typo="Typo.subtitle1">@_receta.Raciones raciones</MudText>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.PhotoCamera"
+                   Class="flex-shrink-0"
+                   Href="@(_tienePresentacion ? $"/recetas/{Id}/presentacion" : $"/recetas/{Id}/presentacion/editar")">
+            @(_tienePresentacion ? "Ver presentación" : "Añadir presentación")
+        </MudButton>
+    </div>
+
+    <MudExpansionPanels Class="mb-6" Elevation="1">
+        <MudExpansionPanel Text="Alérgenos" @bind-Expanded="_alergenosExpandido">
+            @if (_receta.Alergenos.Count == 0)
+            {
+                <MudText Typo="Typo.body2">Sin especificar</MudText>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var alergeno in _receta.Alergenos)
+                    {
+                        <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled">@NombreAlergeno(alergeno)</MudChip>
+                    }
+                </div>
+            }
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+    <MudGrid>
+        <MudItem xs="12" md="4">
+            <MudExpansionPanels Elevation="1">
+                <MudExpansionPanel Text="Ingredientes" @bind-Expanded="_ingredientesExpandido">
+                    @for (var i = 0; i < _receta.Ingredientes.Count; i++)
+                    {
+                        var index = i;
+                        var ingrediente = _receta.Ingredientes[index];
+                        <div class="d-flex align-center mb-1">
+                            <MudCheckBox T="bool"
+                                         Value="_ingredientesMarcados[index]"
+                                         ValueChanged="@((bool v) => _ingredientesMarcados[index] = v)"
+                                         Color="Color.Primary"
+                                         Size="Size.Large"/>
+                            <MudText Typo="Typo.body1"
+                                      Style="@(_ingredientesMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                @ingrediente.Nombre — @FormatearCantidad(ingrediente)
+                            </MudText>
+                        </div>
+                    }
+                </MudExpansionPanel>
+
+                @if (_receta.Utensilios.Count > 0)
+                {
+                    <MudExpansionPanel Text="Utensilios">
+                        <div style="background-color:rgba(109,76,65,0.10); border-radius:16px; padding:16px 20px;">
+                            <MudText Typo="Typo.body1" Style="color:#3E2723; line-height:1.9;">
+                                @FormatearUtensilios()
+                            </MudText>
+                        </div>
+                    </MudExpansionPanel>
+                }
+            </MudExpansionPanels>
+        </MudItem>
+
+        <MudItem xs="12" md="8">
+            <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">@_tituloSeccionPasos</MudText>
+
+            <MudPaper Class="pa-4" Elevation="3">
+                @if (_mostrarBotonListo)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Size="Size.Large"
+                               FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.CheckCircle"
+                               Class="mb-4"
+                               Style="height:64px; font-size:1.15rem; background-color:#B8956A; color:#FFFFFF;"
+                               OnClick="SaltarAElaboracion">
+                        PREPARACIÓN LISTA
+                    </MudButton>
+                }
+
+                <MudStepper @bind-ActiveIndex="_activeIndex"
+                            CurrentStepColor="Color.Primary"
+                            CompletedStepColor="Color.Dark"
+                            NavClass="d-none">
+                    <ChildContent>
+                        @for (var i = 0; i < _pasosOrdenados.Count; i++)
+                        {
+                            var paso = _pasosOrdenados[i];
+                            var index = i;
+                            <MudStep Title="@paso.Fase.ToString()">
+                                <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-2" Style="color:#3E2723; line-height:1.6;">@paso.Descripcion</MudText>
+                                @if (!string.IsNullOrWhiteSpace(paso.Consejo))
+                                {
+                                    <MudPaper Class="pa-3 mt-1 mb-2 d-inline-flex align-center" Elevation="3" Style="border-radius:8px; gap:0.5rem; max-width:fit-content;">
+                                        <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Size="Size.Small" Style="color:#B8956A;"/>
+                                        <MudText Typo="Typo.body2" Style="font-style:italic; color:#6D4C41;">@paso.Consejo</MudText>
+                                    </MudPaper>
+                                }
+                                @if (paso.Fase == FasePaso.Elaboracion && index == _pasosOrdenados.Count - 1)
+                                {
+                                    <MudPaper Class="pa-6 mt-4 d-flex flex-column align-center" Elevation="6" Style="background-color:rgba(109,76,65,0.10); border-radius:12px; border:2px solid #B8956A; text-align:center;">
+                                        <MudText Typo="Typo.body1" Style="color:#3E2723;">
+                                            @(string.IsNullOrWhiteSpace(_receta.NotaFinal) ? "¡Buen provecho!" : _receta.NotaFinal)
+                                        </MudText>
+                                        <MudButton Variant="Variant.Filled"
+                                                   Color="Color.Primary"
+                                                   Class="mt-3"
+                                                   StartIcon="@Icons.Material.Filled.Check"
+                                                   OnClick="MarcarComoTerminadaAsync">
+                                            Hecho
+                                        </MudButton>
+                                    </MudPaper>
+                                }
+                            </MudStep>
+                        }
+                    </ChildContent>
+                    <ActionContent>
+                        <div class="mt-4" style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:1rem; width:100%;">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       Size="Size.Large"
+                                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                                       Style="height:56px; min-width:140px; justify-self:start;"
+                                       Disabled="@(_activeIndex == 0)"
+                                       OnClick="PasoAnterior">
+                                Anterior
+                            </MudButton>
+                            <MudText Typo="Typo.subtitle1" Style="color:#3E2723; font-weight:600; justify-self:center; white-space:nowrap;">
+                                Paso @(_activeIndex + 1) de @_pasosOrdenados.Count
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Size="Size.Large"
+                                       EndIcon="@Icons.Material.Filled.ArrowForward"
+                                       Style="height:56px; min-width:140px; justify-self:end;"
+                                       Disabled="@(_activeIndex >= _pasosOrdenados.Count - 1)"
+                                       OnClick="PasoSiguiente">
+                                Siguiente
+                            </MudButton>
+                        </div>
+                    </ActionContent>
+                </MudStepper>
+            </MudPaper>
+
+            @if (_receta.MiseEnPlace.Count > 0)
+            {
+                <MudExpansionPanels Class="mt-6" Elevation="1">
+                    <MudExpansionPanel Text="Lista de preparación" @bind-Expanded="_preparacionExpandido">
+                        @for (var i = 0; i < _receta.MiseEnPlace.Count; i++)
+                        {
+                            var index = i;
+                            var numeroOrden = i + 1;
+                            var agrupacion = _receta.MiseEnPlace[index];
+                            <div class="d-flex align-center mb-2" style="gap:0.5rem;">
+                                <div class="d-flex align-center justify-center flex-shrink-0"
+                                     style="width:28px; height:28px; border-radius:50%; background-color:#6D4C41; color:#FFFFFF; font-size:0.9rem; font-weight:700;">
+                                    @numeroOrden
+                                </div>
+                                <MudCheckBox T="bool"
+                                             Value="_miseEnPlaceMarcados[index]"
+                                             ValueChanged="@((bool v) => _miseEnPlaceMarcados[index] = v)"
+                                             Color="Color.Primary"
+                                             Size="Size.Large"/>
+                                <MudText Typo="Typo.body1"
+                                          Style="@(_miseEnPlaceMarcados[index] ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                    @agrupacion
+                                </MudText>
+                            </div>
+                        }
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            }
         </MudItem>
     </MudGrid>
-
-    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Ingredientes</MudText>
-    <ul style="list-style:none; padding:0; margin:0 0 2rem 0;">
-        @foreach (var ingrediente in _receta.Ingredientes)
-        {
-            <li class="d-flex align-center mb-2">
-                <MudIcon Icon="@Icons.Material.Filled.FiberManualRecord" Size="Size.Small" Class="mr-2" Style="color:#6D4C41;"/>
-                <MudText Typo="Typo.body1">@ingrediente.Nombre — @FormatearCantidad(ingrediente)</MudText>
-            </li>
-        }
-    </ul>
-
-    <MudText Typo="Typo.h5" Class="mb-2" Style="color:#3E2723;">Preparación</MudText>
-
-    @if (_mostrarBotonListo)
-    {
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Success"
-                   Size="Size.Large"
-                   StartIcon="@Icons.Material.Filled.CheckCircle"
-                   Class="mb-4"
-                   OnClick="SaltarAElaboracion">
-            Ya tengo todo listo
-        </MudButton>
-    }
-
-    <MudStepper @bind-ActiveIndex="_activeIndex">
-        @foreach (var paso in _pasosOrdenados)
-        {
-            <MudStep Title="@paso.Fase.ToString()">
-                <MudText Typo="Typo.h5">@paso.Descripcion</MudText>
-            </MudStep>
-        }
-    </MudStepper>
 }
 
 @code {
@@ -97,12 +247,28 @@ else
     private Receta? _receta;
     private bool _cargando = true;
     private List<Paso> _pasosOrdenados = [];
+    private List<bool> _ingredientesMarcados = [];
+    private List<bool> _miseEnPlaceMarcados = [];
     private int _activeIndex;
+    private bool _progresoComprobado;
+    private bool _ingredientesExpandido = true;
+    private bool _preparacionExpandido = true;
+    private bool _alergenosExpandido;
+    private bool _tienePresentacion;
 
     private bool _mostrarBotonListo =>
         _pasosOrdenados.Count > 0
         && _activeIndex < _pasosOrdenados.Count
         && _pasosOrdenados[_activeIndex].Fase == FasePaso.Preparacion;
+
+    // Encabezado de la tarjeta de pasos: refleja la fase del paso activo (en vez de un
+    // "Preparación" fijo) para no etiquetar mal pasos de Elaboración como "hornear" o "batir".
+    private string _tituloSeccionPasos =>
+        _pasosOrdenados.Count > 0
+        && _activeIndex < _pasosOrdenados.Count
+        && _pasosOrdenados[_activeIndex].Fase == FasePaso.Elaboracion
+            ? "Elaboración"
+            : "Preparación";
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,16 +281,126 @@ else
                 .. _receta.Pasos.Where(p => p.Fase == FasePaso.Preparacion).OrderBy(p => p.Orden),
                 .. _receta.Pasos.Where(p => p.Fase == FasePaso.Elaboracion).OrderBy(p => p.Orden)
             ];
+            _ingredientesMarcados = _receta.Ingredientes.Select(_ => false).ToList();
+            _miseEnPlaceMarcados = _receta.MiseEnPlace.Select(_ => false).ToList();
+
+            var presentacion = await PresentacionService.GetByRecetaIdAsync(Id);
+            _tienePresentacion = presentacion.IsSuccess;
         }
         _cargando = false;
     }
 
-    private void SaltarAElaboracion()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // El diálogo de "continuar donde lo dejaste" depende de un circuito interactivo
+        // activo (MudDialog necesita JS interop real), así que no puede dispararse desde
+        // OnInitializedAsync: esa fase también se ejecuta durante el prerender estático,
+        // donde el diálogo no puede mostrarse ni resolverse. OnAfterRenderAsync(firstRender)
+        // solo se llama una vez el componente ya está vivo en el circuito interactivo.
+        if (!firstRender || _progresoComprobado || _receta is null)
+            return;
+
+        _progresoComprobado = true;
+
+        if (_receta.UltimoPasoIndice > 0 && _receta.UltimoPasoIndice < _pasosOrdenados.Count)
+        {
+            var continuar = await PreguntarSiContinuarAsync();
+            _activeIndex = continuar ? _receta.UltimoPasoIndice : 0;
+
+            // Si elige "Empezar de nuevo", el reseteo debe persistir en la base de datos
+            // (no solo en memoria) o el diálogo volverá a aparecer la próxima vez, porque
+            // UltimoPasoIndice seguiría teniendo su valor anterior.
+            if (!continuar)
+                await GuardarProgresoAsync();
+        }
+
+        // El estado visual (Mise en Place marcada, Ingredientes colapsado) debe reflejar en
+        // qué fase queda el usuario tanto si cruzó en vivo como si reanuda directamente en
+        // Elaboración (por el diálogo de arriba, o porque la receta no tiene pasos de
+        // Preparación y el paso inicial ya es de Elaboración).
+        if (_pasosOrdenados.Count > 0 && _pasosOrdenados[_activeIndex].Fase == FasePaso.Elaboracion)
+            EntrarEnElaboracion();
+
+        StateHasChanged();
+    }
+
+    private async Task<bool> PreguntarSiContinuarAsync()
+    {
+        var parameters = new DialogParameters<ConfirmDialog>
+        {
+            { x => x.ContentText, $"Dejaste esta receta en el paso {_receta!.UltimoPasoIndice + 1}. ¿Continuar donde lo dejaste, o empezar desde el principio?" },
+            { x => x.ConfirmText, "Continuar" },
+            { x => x.CancelText, "Empezar de nuevo" },
+            { x => x.ConfirmColor, Color.Primary }
+        };
+
+        var dialog = await DialogService.ShowAsync<ConfirmDialog>("Progreso guardado", parameters);
+        var resultado = await dialog.Result;
+        return resultado is not null && !resultado.Canceled;
+    }
+
+    private async Task SaltarAElaboracion()
     {
         var primerIndiceElaboracion = _pasosOrdenados.FindIndex(p => p.Fase == FasePaso.Elaboracion);
         if (primerIndiceElaboracion >= 0)
+        {
             _activeIndex = primerIndiceElaboracion;
+            EntrarEnElaboracion();
+            await GuardarProgresoAsync();
+        }
     }
+
+    private async Task PasoAnterior()
+    {
+        if (_activeIndex > 0)
+        {
+            _activeIndex--;
+            await GuardarProgresoAsync();
+        }
+    }
+
+    private async Task PasoSiguiente()
+    {
+        if (_activeIndex < _pasosOrdenados.Count - 1)
+        {
+            var faseAnterior = _pasosOrdenados[_activeIndex].Fase;
+            _activeIndex++;
+            if (faseAnterior == FasePaso.Preparacion && _pasosOrdenados[_activeIndex].Fase == FasePaso.Elaboracion)
+                EntrarEnElaboracion();
+            await GuardarProgresoAsync();
+        }
+    }
+
+    /// <summary>
+    /// Se dispara justo al cruzar de Preparación a Elaboración: marca la Mise en Place como
+    /// completada (solo visual de esta sesión, no se persiste) y colapsa Ingredientes y la
+    /// Lista de preparación para dejar sitio a los pasos de elaboración, sin ocultarlos del
+    /// todo: el usuario puede reabrirlos manualmente si los necesita.
+    /// </summary>
+    private void EntrarEnElaboracion()
+    {
+        for (var i = 0; i < _miseEnPlaceMarcados.Count; i++)
+            _miseEnPlaceMarcados[i] = true;
+        _ingredientesExpandido = false;
+        _preparacionExpandido = false;
+    }
+
+    private async Task GuardarProgresoAsync()
+    {
+        await RecetaService.GuardarProgresoAsync(Id, _activeIndex);
+    }
+
+    private async Task MarcarComoTerminadaAsync()
+    {
+        await RecetaService.GuardarProgresoAsync(Id, 0);
+        Navigation.NavigateTo("/");
+    }
+
+    private string FormatearUtensilios() =>
+        string.Join(" · ", (_receta?.Utensilios ?? [])
+            .SelectMany(u => u.Split(','))
+            .Select(u => u.Trim())
+            .Where(u => u.Length > 0));
 
     private static string FormatearCantidad(Ingrediente ingrediente)
     {
@@ -132,8 +408,21 @@ else
         {
             UnidadMedida.Gramos => "g",
             UnidadMedida.Mililitros => "ml",
+            UnidadMedida.Unidades => "ud.",
             _ => ingrediente.Unidad.ToString()
         };
-        return $"{ingrediente.Cantidad} {unidad}";
+        var cantidad = ingrediente.Cantidad == Math.Truncate(ingrediente.Cantidad)
+            ? ((int)ingrediente.Cantidad).ToString()
+            : ingrediente.Cantidad.ToString();
+        return $"{cantidad} {unidad}";
     }
+
+    private static string NombreAlergeno(Alergeno alergeno) => alergeno switch
+    {
+        Alergeno.FrutosDeCascara => "Frutos de cáscara",
+        Alergeno.Crustaceos => "Crustáceos",
+        Alergeno.Lacteos => "Lácteos",
+        Alergeno.Sesamo => "Sésamo",
+        _ => alergeno.ToString()
+    };
 }

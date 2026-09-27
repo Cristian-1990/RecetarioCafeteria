@@ -6,4 +6,5 @@ public record Paso
     public int Orden { get; set; } //Orden relativo a su propia Fase, no global
     public string Descripcion { get; set; } = string.Empty;
     public FasePaso Fase { get; set; }
+    public string? Consejo { get; set; }
 }

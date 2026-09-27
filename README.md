@@ -117,3 +117,4 @@ Las rutas de gestión de recetas (`/recetas/nueva` y `/recetas/{id}/editar`) **n
 - Imágenes por paso de la receta (no solo una foto general).
 - Mejoras visuales de interfaz.
 - Posible división de `TiempoMinutos` en tiempo de Preparación y tiempo de Elaboración por separado.
+- Ocultar la lista de ingredientes al pulsar "Ya tengo todo listo", para dar más espacio visual a la Elaboración.
